@@ -8,7 +8,7 @@
 
     <meta
         name="description"
-        content="A simple Windows 10 simulator made using .NET 6."
+        content="A simple Windows 10 simulator that works on Windows 7 SP1+."
     >
 
     <link rel="stylesheet" href="style.css">
@@ -19,21 +19,15 @@
     <!-- Hero -->
     <header class="hero">
         <div class="hero-inner">
-
-            <div class="windows-logo" aria-label="Windows logo">
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
+            <img src="assets/win10.png" alt="Windows 10 Logo" class="windows-logo">
 
             <div class="hero-text">
-                <p class="eyebrow">.NET 6</p>
+                <p class="eyebrow">Works on Windows 7 SP1+</p>
 
                 <h1>Windows 10 Simulator</h1>
 
                 <p class="tagline">
-                    A simple simulator made using .NET 6.
+                    A simple simulator that works on Windows 7 SP1+.
                 </p>
             </div>
 
@@ -178,6 +172,29 @@
 
         </section>
 
+        <!-- Screenshots -->
+        <section class="screenshots-section">
+
+            <div class="section-heading">
+                <p class="eyebrow">Preview</p>
+                <h2>Screenshots</h2>
+                <p>Click any image to enlarge</p>
+            </div>
+
+            <div class="screenshots-grid">
+                <button type="button" class="screenshot-card" data-full="assets/screenshot1.png">
+                    <img src="assets/screenshot1.png" alt="Windows 10 Simulator Screenshot 1" loading="lazy">
+                    <span class="screenshot-caption">Desktop & Navigation</span>
+                </button>
+
+                <button type="button" class="screenshot-card" data-full="assets/screenshot2.png">
+                    <img src="assets/screenshot2.png" alt="Windows 10 Simulator Screenshot 2" loading="lazy">
+                    <span class="screenshot-caption">Apps & Settings</span>
+                </button>
+            </div>
+
+        </section>
+
     </main>
 
 
@@ -189,11 +206,19 @@
         </span>
 
         <span>
-            Made with .NET 6
+            Works on Windows 7 SP1+
         </span>
 
     </footer>
 
+    <!-- Screenshot Modal -->
+    <div id="screenshot-modal" class="modal" hidden aria-hidden="true">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <button type="button" id="modal-close" class="modal-close" aria-label="Close preview">&times;</button>
+            <img id="modal-img" src="" alt="Enlarged screenshot preview">
+        </div>
+    </div>
 
     <script src="script.js"></script>
 

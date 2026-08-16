@@ -386,7 +386,87 @@ function escapeHtml(value) {
 
 
 /* =========================
+   SCREENSHOT MODAL
+   ========================= */
+
+function initScreenshotModal() {
+
+    const modal =
+        document.getElementById("screenshot-modal");
+
+    const modalImg =
+        document.getElementById("modal-img");
+
+    const modalClose =
+        document.getElementById("modal-close");
+
+    const backdrop =
+        modal?.querySelector(".modal-backdrop");
+
+    const screenshotCards =
+        document.querySelectorAll(".screenshot-card");
+
+
+    if (!modal || !modalImg) return;
+
+
+    function openModal(imageSrc) {
+
+        modalImg.src = imageSrc;
+
+        modal.hidden = false;
+
+        modal.setAttribute("aria-hidden", "false");
+
+        document.body.style.overflow = "hidden";
+    }
+
+
+    function closeModal() {
+
+        modal.hidden = true;
+
+        modal.setAttribute("aria-hidden", "true");
+
+        modalImg.src = "";
+
+        document.body.style.overflow = "";
+    }
+
+
+    screenshotCards.forEach(card => {
+
+        card.addEventListener("click", () => {
+
+            const fullSrc =
+                card.getAttribute("data-full");
+
+            if (fullSrc) openModal(fullSrc);
+
+        });
+
+    });
+
+
+    modalClose?.addEventListener("click", closeModal);
+
+    backdrop?.addEventListener("click", closeModal);
+
+
+    document.addEventListener("keydown", e => {
+
+        if (e.key === "Escape" && !modal.hidden) {
+            closeModal();
+        }
+
+    });
+}
+
+
+/* =========================
    START
    ========================= */
 
 loadReleases();
+
+initScreenshotModal();
