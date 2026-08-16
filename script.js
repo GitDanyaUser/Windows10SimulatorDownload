@@ -213,12 +213,12 @@ async function loadReleases() {
            ========================= */
 
         releaseMeta.textContent =
-            `${latest.tag_name} · Released ${
-                formatDate(
-                    latest.published_at ||
-                    latest.created_at
-                )
-            }`;
+            `Released ${
+            formatDate(
+                latest.published_at ||
+                latest.created_at
+            )
+        }`;
 
 
         /* =========================
@@ -293,8 +293,7 @@ async function loadReleases() {
                             <strong>
                                 ${
                                     escapeHtml(
-                                        release.name ||
-                                        release.tag_name
+                                        release.name || "Release"
                                     )
                                 }
                             </strong>
