@@ -1,0 +1,623 @@
+@font-face {
+    font-family: "Site Segoe";
+
+    src:
+        url("./fonts/SEGOEUI.TTF")
+        format("truetype");
+
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Site Segoe";
+
+    src:
+        url("./fonts/SEGOEUIB.TTF")
+        format("truetype");
+
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+
+:root {
+    --blue: #0078d4;
+    --blue-dark: #005a9e;
+
+    --text: #202020;
+    --muted: #606060;
+
+    --background: #f4f4f4;
+    --white: #ffffff;
+
+    --border: #dddddd;
+}
+
+
+* {
+    box-sizing: border-box;
+}
+
+
+html {
+    scroll-behavior: smooth;
+}
+
+
+body {
+    margin: 0;
+
+    background: var(--background);
+
+    color: var(--text);
+
+    font-family:
+        "Site Segoe",
+        "Segoe UI",
+        sans-serif;
+
+    font-size: 16px;
+
+    line-height: 1.55;
+}
+
+
+a {
+    color: inherit;
+}
+
+
+/* =========================
+   HERO
+   ========================= */
+
+.hero {
+    position: relative;
+
+    min-height: 390px;
+
+    display: flex;
+    align-items: center;
+
+    overflow: hidden;
+
+    color: white;
+
+    background:
+        linear-gradient(
+            120deg,
+            #0078d4,
+            #005a9e
+        );
+}
+
+
+.hero::after {
+    content: "";
+
+    position: absolute;
+
+    width: 520px;
+    height: 520px;
+
+    right: -190px;
+    top: -210px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.12);
+
+    transform: rotate(45deg);
+
+    pointer-events: none;
+}
+
+
+.hero-inner {
+    position: relative;
+    z-index: 1;
+
+    width:
+        min(
+            1080px,
+            calc(100% - 48px)
+        );
+
+    margin: 0 auto;
+
+    display: flex;
+    align-items: center;
+
+    gap: 38px;
+}
+
+
+.hero-text {
+    min-width: 0;
+}
+
+
+/* =========================
+   WINDOWS LOGO
+   ========================= */
+
+.windows-logo {
+    width: 112px;
+    height: 112px;
+
+    flex: 0 0 auto;
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    grid-template-rows:
+        1fr 1fr;
+
+    gap: 7px;
+
+    transform: skewY(-7deg);
+}
+
+
+.windows-logo span {
+    display: block;
+
+    background: white;
+}
+
+
+/* =========================
+   TYPOGRAPHY
+   ========================= */
+
+.eyebrow {
+    margin: 0 0 7px;
+
+    color: var(--blue);
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.14em;
+
+    text-transform: uppercase;
+}
+
+
+.hero .eyebrow {
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.78
+        );
+}
+
+
+h1,
+h2,
+p {
+    margin-top: 0;
+}
+
+
+h1 {
+    margin-bottom: 12px;
+
+    font-size:
+        clamp(
+            42px,
+            7vw,
+            76px
+        );
+
+    line-height: 0.98;
+
+    font-weight: 300;
+
+    letter-spacing: -0.035em;
+}
+
+
+.tagline {
+    margin: 0;
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.88
+        );
+
+    font-size: 21px;
+
+    font-weight: 300;
+}
+
+
+h2 {
+    margin-bottom: 10px;
+
+    font-size: 38px;
+
+    line-height: 1.1;
+
+    font-weight: 300;
+
+    letter-spacing: -0.02em;
+}
+
+
+/* =========================
+   MAIN
+   ========================= */
+
+main {
+    width:
+        min(
+            1080px,
+            calc(100% - 48px)
+        );
+
+    margin: 0 auto;
+}
+
+
+section {
+    padding: 82px 0;
+
+    border-bottom:
+        1px solid
+        var(--border);
+}
+
+
+.section-heading > p:last-child {
+    margin-bottom: 0;
+
+    color: var(--muted);
+}
+
+
+/* =========================
+   DOWNLOADS
+   ========================= */
+
+.downloads {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
+
+    gap: 18px;
+
+    margin-top: 35px;
+}
+
+
+.download-card {
+    display: flex;
+    align-items: center;
+
+    gap: 18px;
+
+    min-height: 110px;
+
+    padding: 24px;
+
+    background: var(--white);
+
+    border:
+        1px solid
+        #e5e5e5;
+
+    text-decoration: none;
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        border-color 0.15s ease;
+}
+
+
+.download-card:hover {
+    transform: translateY(-3px);
+
+    border-color: #c8c8c8;
+
+    box-shadow:
+        0 8px 24px
+        rgba(0, 0, 0, 0.09);
+}
+
+
+.download-card:focus-visible {
+    outline:
+        3px solid
+        rgba(0, 120, 212, 0.35);
+
+    outline-offset: 3px;
+}
+
+
+.download-icon {
+    width: 48px;
+    height: 48px;
+
+    flex: 0 0 auto;
+
+    display: grid;
+    place-items: center;
+
+    background: var(--blue);
+
+    color: white;
+
+    font-size: 28px;
+
+    font-weight: 300;
+}
+
+
+.download-card strong {
+    display: block;
+
+    font-size: 20px;
+
+    font-weight: 400;
+}
+
+
+.download-card small {
+    color: var(--muted);
+
+    font-size: 14px;
+}
+
+
+/* =========================
+   ERROR
+   ========================= */
+
+.error {
+    margin-top: 18px;
+
+    padding: 14px 16px;
+
+    background: #fff4f4;
+
+    border-left:
+        3px solid
+        #d13438;
+
+    color: #6e1b1e;
+}
+
+
+/* =========================
+   CHANGELOG
+   ========================= */
+
+.changelog {
+    max-width: 820px;
+
+    padding: 28px;
+
+    background: white;
+
+    border:
+        1px solid
+        #e5e5e5;
+}
+
+
+.changelog h1,
+.changelog h2,
+.changelog h3 {
+    margin-top: 1.2em;
+
+    margin-bottom: 0.5em;
+
+    font-weight: 400;
+}
+
+
+.changelog h1:first-child,
+.changelog h2:first-child,
+.changelog h3:first-child {
+    margin-top: 0;
+}
+
+
+.changelog ul,
+.changelog ol {
+    padding-left: 24px;
+}
+
+
+/* =========================
+   ARCHIVE
+   ========================= */
+
+.archive-title {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-end;
+
+    gap: 30px;
+}
+
+
+#github-link {
+    color: var(--blue);
+
+    text-decoration: none;
+
+    white-space: nowrap;
+}
+
+
+#github-link:hover {
+    text-decoration: underline;
+}
+
+
+#github-link:focus-visible {
+    outline:
+        3px solid
+        rgba(0, 120, 212, 0.35);
+
+    outline-offset: 3px;
+}
+
+
+.archive {
+    margin-top: 28px;
+
+    background: white;
+
+    border:
+        1px solid
+        #e5e5e5;
+}
+
+
+.release {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 20px;
+
+    padding: 20px 24px;
+
+    border-bottom:
+        1px solid
+        #eeeeee;
+
+    text-decoration: none;
+}
+
+
+.release:last-child {
+    border-bottom: 0;
+}
+
+
+.release:hover {
+    background: #fafafa;
+}
+
+
+.release strong {
+    display: block;
+
+    font-size: 17px;
+
+    font-weight: 400;
+}
+
+
+.release small {
+    color: var(--muted);
+}
+
+
+.release-arrow {
+    color: var(--blue);
+
+    font-size: 20px;
+}
+
+
+/* =========================
+   FOOTER
+   ========================= */
+
+footer {
+    width:
+        min(
+            1080px,
+            calc(100% - 48px)
+        );
+
+    margin: 0 auto;
+
+    padding:
+        30px 0
+        45px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    color: #777;
+
+    font-size: 13px;
+}
+
+
+/* =========================
+   MOBILE
+   ========================= */
+
+@media (max-width: 700px) {
+
+    .hero {
+        min-height: 330px;
+    }
+
+
+    .hero-inner {
+        gap: 22px;
+    }
+
+
+    .windows-logo {
+        width: 72px;
+        height: 72px;
+    }
+
+
+    h1 {
+        font-size: 46px;
+    }
+
+
+    .tagline {
+        font-size: 17px;
+    }
+
+
+    .downloads {
+        grid-template-columns: 1fr;
+    }
+
+
+    .archive-title,
+    footer {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    section {
+        padding: 58px 0;
+    }
+}

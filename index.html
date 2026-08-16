@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Windows 10 Simulator</title>
+
+    <meta
+        name="description"
+        content="A simple Windows 10 simulator made using .NET 6."
+    >
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Hero -->
+    <header class="hero">
+        <div class="hero-inner">
+
+            <div class="windows-logo" aria-label="Windows logo">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <div class="hero-text">
+                <p class="eyebrow">.NET 6</p>
+
+                <h1>Windows 10 Simulator</h1>
+
+                <p class="tagline">
+                    A simple simulator made using .NET 6.
+                </p>
+            </div>
+
+        </div>
+    </header>
+
+
+    <main>
+
+        <!-- Downloads -->
+        <section class="download-section">
+
+            <div class="section-heading">
+                <p class="eyebrow">Get the latest version</p>
+
+                <h2>Download</h2>
+
+                <p id="release-meta">
+                    Loading the latest release…
+                </p>
+            </div>
+
+
+            <div class="downloads">
+
+                <a
+                    id="x86"
+                    class="download-card"
+                    href="#"
+                    hidden
+                >
+                    <span class="download-icon">↓</span>
+
+                    <span>
+                        <strong>Download x86</strong>
+
+                        <small id="x86-name">
+                            32-bit installer
+                        </small>
+                    </span>
+                </a>
+
+
+                <a
+                    id="x64"
+                    class="download-card"
+                    href="#"
+                    hidden
+                >
+                    <span class="download-icon">↓</span>
+
+                    <span>
+                        <strong>Download x64</strong>
+
+                        <small id="x64-name">
+                            64-bit installer
+                        </small>
+                    </span>
+                </a>
+
+            </div>
+
+
+            <p
+                id="download-error"
+                class="error"
+                hidden
+            >
+                The latest release could not be loaded.
+                You can use the Archive below.
+            </p>
+
+        </section>
+
+
+        <!-- Changelog -->
+        <section class="changelog-section">
+
+            <div class="section-heading">
+
+                <p class="eyebrow">
+                    What's new
+                </p>
+
+                <h2>
+                    Changelog
+                </h2>
+
+            </div>
+
+
+            <article
+                id="changelog"
+                class="changelog"
+            >
+                <p>
+                    Loading…
+                </p>
+            </article>
+
+        </section>
+
+
+        <!-- Archive -->
+        <section class="archive-section">
+
+            <div class="archive-title">
+
+                <div>
+
+                    <p class="eyebrow">
+                        Older versions
+                    </p>
+
+                    <h2>
+                        Archive
+                    </h2>
+
+                </div>
+
+
+                <a
+                    id="github-link"
+                    href="#"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    GitHub Releases ↗
+                </a>
+
+            </div>
+
+
+            <div
+                id="archive"
+                class="archive"
+            >
+                <p>
+                    Loading releases…
+                </p>
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- Footer -->
+    <footer>
+
+        <span>
+            Windows 10 Simulator
+        </span>
+
+        <span>
+            Made with .NET 6
+        </span>
+
+    </footer>
+
+
+    <script src="script.js"></script>
+
+</body>
+</html>
