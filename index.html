@@ -8,7 +8,7 @@
 
     <meta
         name="description"
-        content="A simple Windows 10 simulator that works on Windows 7 SP1+."
+        content="A simple Windows 10 simulator."
     >
 
     <link rel="stylesheet" href="style.css">
@@ -22,12 +22,10 @@
             <img src="assets/win10.png" alt="Windows 10 Logo" class="windows-logo">
 
             <div class="hero-text">
-                <p class="eyebrow">Works on Windows 7 SP1+</p>
-
                 <h1>Windows 10 Simulator</h1>
 
                 <p class="tagline">
-                    A simple simulator that works on Windows 7 SP1+.
+                    A simple simulator for Windows.
                 </p>
             </div>
 
@@ -44,6 +42,8 @@
                 <p class="eyebrow">Get the latest version</p>
 
                 <h2>Download</h2>
+
+                <p class="system-reqs">Works on Windows 7 SP1+</p>
 
                 <p id="release-meta">
                     Loading the latest release…
@@ -99,6 +99,27 @@
                 The latest release could not be loaded.
                 You can use the Archive below.
             </p>
+
+        </section>
+
+
+        <!-- Screenshots -->
+        <section class="screenshots-section">
+
+            <div class="section-heading">
+                <p class="eyebrow">Preview</p>
+                <h2>Screenshots</h2>
+            </div>
+
+            <div class="screenshots-grid">
+                <button type="button" class="screenshot-card" data-full="assets/screenshot1.png" aria-label="Enlarge Screenshot 1">
+                    <img src="assets/screenshot1.png" alt="Windows 10 Simulator Screenshot 1" loading="lazy">
+                </button>
+
+                <button type="button" class="screenshot-card" data-full="assets/screenshot2.png" aria-label="Enlarge Screenshot 2">
+                    <img src="assets/screenshot2.png" alt="Windows 10 Simulator Screenshot 2" loading="lazy">
+                </button>
+            </div>
 
         </section>
 
@@ -172,29 +193,6 @@
 
         </section>
 
-        <!-- Screenshots -->
-        <section class="screenshots-section">
-
-            <div class="section-heading">
-                <p class="eyebrow">Preview</p>
-                <h2>Screenshots</h2>
-                <p>Click any image to enlarge</p>
-            </div>
-
-            <div class="screenshots-grid">
-                <button type="button" class="screenshot-card" data-full="assets/screenshot1.png">
-                    <img src="assets/screenshot1.png" alt="Windows 10 Simulator Screenshot 1" loading="lazy">
-                    <span class="screenshot-caption">Desktop & Navigation</span>
-                </button>
-
-                <button type="button" class="screenshot-card" data-full="assets/screenshot2.png">
-                    <img src="assets/screenshot2.png" alt="Windows 10 Simulator Screenshot 2" loading="lazy">
-                    <span class="screenshot-caption">Apps & Settings</span>
-                </button>
-            </div>
-
-        </section>
-
     </main>
 
 
@@ -205,16 +203,12 @@
             Windows 10 Simulator
         </span>
 
-        <span>
-            Works on Windows 7 SP1+
-        </span>
-
     </footer>
 
     <!-- Screenshot Modal -->
     <div id="screenshot-modal" class="modal" hidden aria-hidden="true">
         <div class="modal-backdrop"></div>
-        <div class="modal-content">
+        <div class="modal-wrapper">
             <button type="button" id="modal-close" class="modal-close" aria-label="Close preview">&times;</button>
             <img id="modal-img" src="" alt="Enlarged screenshot preview">
         </div>
