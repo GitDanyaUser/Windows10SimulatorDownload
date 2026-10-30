@@ -7,29 +7,40 @@
     <title>Windows 10 Simulator</title>
     <link rel="icon" type="image/png" sizes="48x48" href="favicon.png">
 
-    <meta
-        name="description"
-        content="A simple Windows 10 simulator."
-    >
+    <meta name="description" content="A simple Windows 10 simulator.">
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
+    <!-- Global navigation -->
+    <nav class="topbar" aria-label="Site">
+        <div class="topbar-inner">
+            <a class="brand" href="#top">
+                <img src="assets/win10.png" alt="" class="brand-logo">
+                <span class="brand-name">Windows 10 Simulator</span>
+            </a>
+
+            <ul class="topbar-links">
+                <li><a href="#download">Download</a></li>
+                <li><a href="#screenshots">Screenshots</a></li>
+                <li><a href="#changelog-section">What's new</a></li>
+                <li><a href="#archive-section">Archive</a></li>
+            </ul>
+        </div>
+    </nav>
+
     <!-- Hero -->
-    <header class="hero">
+    <header class="hero" id="top">
         <div class="hero-inner">
             <img src="assets/win10.png" alt="Windows 10 Logo" class="windows-logo">
 
             <div class="hero-text">
                 <h1>Windows 10 Simulator</h1>
-
-                <p class="tagline">
-                    A simple simulator for Windows.
-                </p>
+                <p class="tagline">A simple simulator for Windows.</p>
+                <a class="hero-button" href="#download">Download now</a>
             </div>
-
         </div>
     </header>
 
@@ -37,66 +48,37 @@
     <main>
 
         <!-- Downloads -->
-        <section class="download-section">
+        <section class="download-section" id="download">
 
             <div class="section-heading">
-                <p class="eyebrow">Get the latest version</p>
-
-                <h2>Download</h2>
+                <h2>Download Windows 10 Simulator</h2>
 
                 <p class="system-reqs">Works on Windows 7 SP1+</p>
 
-                <p id="release-meta">
-                    Loading the latest release…
-                </p>
+                <p id="release-meta">Loading the latest release…</p>
             </div>
-
 
             <div class="downloads">
 
-                <a
-                    id="x86"
-                    class="download-card"
-                    href="#"
-                    hidden
-                >
-                    <span class="download-icon">↓</span>
-
+                <a id="x86" class="download-card" href="#" hidden>
+                    <span class="download-icon" aria-hidden="true">↓</span>
                     <span>
                         <strong>Download x86</strong>
-
-                        <small id="x86-name">
-                            32-bit installer
-                        </small>
+                        <small id="x86-name">32-bit installer</small>
                     </span>
                 </a>
 
-
-                <a
-                    id="x64"
-                    class="download-card"
-                    href="#"
-                    hidden
-                >
-                    <span class="download-icon">↓</span>
-
+                <a id="x64" class="download-card" href="#" hidden>
+                    <span class="download-icon" aria-hidden="true">↓</span>
                     <span>
                         <strong>Download x64</strong>
-
-                        <small id="x64-name">
-                            64-bit installer
-                        </small>
+                        <small id="x64-name">64-bit installer</small>
                     </span>
                 </a>
 
             </div>
 
-
-            <p
-                id="download-error"
-                class="error"
-                hidden
-            >
+            <p id="download-error" class="error" hidden>
                 The latest release could not be loaded.
                 You can use the Archive below.
             </p>
@@ -105,11 +87,11 @@
 
 
         <!-- Screenshots -->
-        <section class="screenshots-section">
+        <section class="screenshots-section" id="screenshots">
 
             <div class="section-heading">
-                <p class="eyebrow">Preview</p>
                 <h2>Screenshots</h2>
+                <p>Select a screenshot to enlarge it.</p>
             </div>
 
             <div class="screenshots-grid">
@@ -130,70 +112,35 @@
 
 
         <!-- Changelog -->
-        <section class="changelog-section">
+        <section class="changelog-section" id="changelog-section">
 
             <div class="section-heading">
-
-                <p class="eyebrow">
-                    What's new
-                </p>
-
-                <h2>
-                    Changelog
-                </h2>
-
+                <h2>What's new</h2>
             </div>
 
-
-            <article
-                id="changelog"
-                class="changelog"
-            >
-                <p>
-                    Loading…
-                </p>
+            <article id="changelog" class="changelog">
+                <p>Loading…</p>
             </article>
 
         </section>
 
 
         <!-- Archive -->
-        <section class="archive-section">
+        <section class="archive-section" id="archive-section">
 
             <div class="archive-title">
-
                 <div>
-
-                    <p class="eyebrow">
-                        Older versions
-                    </p>
-
-                    <h2>
-                        Archive
-                    </h2>
-
+                    <h2>Archive</h2>
+                    <p class="archive-sub">Older versions</p>
                 </div>
 
-
-                <a
-                    id="github-link"
-                    href="#"
-                    target="_blank"
-                    rel="noopener"
-                >
+                <a id="github-link" href="#" target="_blank" rel="noopener">
                     GitHub Releases ↗
                 </a>
-
             </div>
 
-
-            <div
-                id="archive"
-                class="archive"
-            >
-                <p>
-                    Loading releases…
-                </p>
+            <div id="archive" class="archive">
+                <p>Loading releases…</p>
             </div>
 
         </section>
@@ -203,11 +150,10 @@
 
     <!-- Footer -->
     <footer>
-
-        <span>
-            Windows 10 Simulator
-        </span>
-
+        <div class="footer-inner">
+            <span>Windows 10 Simulator</span>
+            <span class="footer-note">An unofficial fan project, not affiliated with Microsoft.</span>
+        </div>
     </footer>
 
     <!-- Screenshot Modal -->

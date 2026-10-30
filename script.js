@@ -105,6 +105,11 @@ function renderMarkdown(text) {
         )
 
         .replace(
+            /(<li>.*<\/li>\n?)+/g,
+            match => `<ul>${match.replace(/\n/g, "")}</ul>`
+        )
+
+        .replace(
             /\r?\n\r?\n/g,
             "<br><br>"
         );
