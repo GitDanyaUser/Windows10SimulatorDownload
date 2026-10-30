@@ -36,8 +36,6 @@
     <!-- Hero -->
     <header class="hero" id="top">
         <div class="hero-inner">
-            <img src="assets/win10.png" alt="Windows 10 Logo" class="windows-logo">
-
             <div class="hero-text">
                 <h1>Windows 10 Simulator</h1>
                 <p class="tagline">A simple simulator for Windows.</p>
@@ -157,6 +155,23 @@
             <span class="footer-note">An unofficial fan project, not affiliated with Microsoft.</span>
         </div>
     </footer>
+
+    <!-- All Releases Popup -->
+    <div id="releases-modal" class="modal" hidden aria-hidden="true">
+        <div class="modal-backdrop" data-close></div>
+
+        <div class="releases-dialog" role="dialog" aria-modal="true" aria-labelledby="releases-title">
+            <div class="releases-head">
+                <h2 id="releases-title">All releases</h2>
+                <button type="button" id="releases-close" class="releases-close" aria-label="Close releases">&times;</button>
+            </div>
+
+            <div class="releases-body">
+                <div id="releases-list" class="releases-list" aria-label="Releases"></div>
+                <div id="release-detail" class="release-detail" tabindex="-1"></div>
+            </div>
+        </div>
+    </div>
 
     <!-- Screenshot Modal -->
     <div id="screenshot-modal" class="modal" hidden aria-hidden="true">
