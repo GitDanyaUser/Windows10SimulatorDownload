@@ -537,7 +537,7 @@ footer {
 
     .topbar-links { display: none; }
 
-    .hero { min-height: 360px; background-position: right center; }
+    .hero { min-height: 360px; background-position: 85% center; }
 
     .hero-inner { padding: 56px 0; }
 
