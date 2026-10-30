@@ -96,9 +96,15 @@ h1, h2, h3, p { margin-top: 0; }
 
 .brand:hover { color: var(--text); }
 
-.brand-logo { width: 22px; height: 22px; object-fit: contain; }
+.brand-logo { height: 24px; width: auto; display: block; }
 
-.brand-name { font-size: 15px; font-weight: 700; }
+.brand-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--border-strong);
+}
+
+.brand-name { font-size: 15px; font-weight: 600; }
 
 .topbar-links {
     display: flex;
@@ -128,43 +134,14 @@ h1, h2, h3, p { margin-top: 0; }
    ========================= */
 
 .hero {
-    position: relative;
-    min-height: 360px;
+    min-height: 340px;
     display: flex;
     align-items: center;
-    overflow: hidden;
     color: #ffffff;
-    background:
-        linear-gradient(135deg, #0a2f6b 0%, #0a64c8 45%, #1e9bf0 100%);
-}
-
-/* Windows 10 hero "window light" beams */
-.hero::before,
-.hero::after {
-    content: "";
-    position: absolute;
-    pointer-events: none;
-}
-
-.hero::before {
-    inset: 0;
-    background:
-        linear-gradient(100deg, transparent 52%, rgba(255,255,255,0.10) 52%, rgba(255,255,255,0.10) 62%, transparent 62%),
-        linear-gradient(100deg, transparent 66%, rgba(255,255,255,0.06) 66%, rgba(255,255,255,0.06) 80%, transparent 80%),
-        linear-gradient(100deg, transparent 84%, rgba(255,255,255,0.12) 84%, rgba(255,255,255,0.12) 100%);
-}
-
-.hero::after {
-    width: 720px;
-    height: 720px;
-    right: -240px;
-    bottom: -420px;
-    background: radial-gradient(circle, rgba(120, 210, 255, 0.45), transparent 65%);
+    background: #0078d4;
 }
 
 .hero-inner {
-    position: relative;
-    z-index: 1;
     width: min(1180px, calc(100% - 48px));
     margin: 0 auto;
     padding: 56px 0;
