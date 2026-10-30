@@ -32,6 +32,8 @@
     --border-strong: #8a8a8a;
 
     --focus: #1a1a1a;
+
+    --icons: "Segoe MDL2 Assets Site", "Segoe MDL2 Assets", "Segoe Fluent Icons";
 }
 
 
@@ -271,7 +273,8 @@ h2 {
     place-items: center;
     background: var(--blue);
     color: #ffffff;
-    font-size: 22px;
+    font-family: var(--icons);
+    font-size: 20px;
 }
 
 .download-card:hover .download-icon { background: var(--blue-hover); }
@@ -390,7 +393,8 @@ h2 {
     background: var(--blue);
     color: #ffffff;
     border: 0;
-    font-size: 22px;
+    font-family: var(--icons);
+    font-size: 14px;
     line-height: 1;
     cursor: pointer;
     display: grid;
@@ -568,6 +572,11 @@ footer {
     font-weight: 600;
 }
 
+.release-all .release-arrow {
+    font-family: var(--icons);
+    font-size: 16px;
+}
+
 .releases-dialog {
     position: relative;
     z-index: 10;
@@ -599,7 +608,8 @@ footer {
     background: transparent;
     border: 0;
     color: var(--text);
-    font-size: 26px;
+    font-family: var(--icons);
+    font-size: 16px;
     line-height: 1;
     cursor: pointer;
 }
@@ -717,6 +727,8 @@ footer {
     place-items: center;
     background: var(--blue);
     color: #ffffff;
+    font-family: var(--icons);
+    font-size: 14px;
 }
 
 .rd-asset-name {

@@ -509,7 +509,7 @@ function renderArchive() {
                     <strong>List all releases (${allReleases.length})</strong>
                 </span>
 
-                <span class="release-arrow">›</span>
+                <span class="release-arrow" aria-hidden="true">&#xE712;</span>
             </button>
 
         `;
@@ -606,7 +606,7 @@ function initReleasesModal() {
                         class="rd-asset"
                         href="${escapeHtml(asset.browser_download_url)}"
                     >
-                        <span class="rd-asset-icon" aria-hidden="true">↓</span>
+                        <span class="rd-asset-icon" aria-hidden="true">&#xE896;</span>
                         <span class="rd-asset-name">${escapeHtml(asset.name)}</span>
                         <small>${formatSize(asset.size)}</small>
                     </a>
