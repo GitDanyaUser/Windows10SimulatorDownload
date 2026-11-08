@@ -71,53 +71,74 @@ function formatDate(dateString) {
 
 function renderMarkdown(text) {
 
-    const escaped =
-        (text || "")
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;");
+    // Convert HTML space entities into actual spaces
+    text = (text || "").replace(/&#x20;|&#32;/gi, " ");
 
+    // Escape HTML
+    const escaped = text
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
 
-    return escaped
-        .replace(
-            /^### (.+)$/gm,
-            "<h3>$1</h3>"
-        )
+    // Store inline code to prevent other Markdown
+    // formatting from affecting its contents
+    const codeBlocks = [];
 
-        .replace(
-            /^## (.+)$/gm,
-            "<h2>$1</h2>"
-        )
+    let result = escaped.replace(
+        /`([^`]+)`/g,
+        (_, code) => {
+            const index = codeBlocks.length;
 
-        .replace(
-            /^# (.+)$/gm,
-            "<h1>$1</h1>"
-        )
+            codeBlocks.push(
+                `<code>${code}</code>`
+            );
 
-        .replace(
-            /^\- (.+)$/gm,
-            "<li>$1</li>"
-        )
+            return `%%CODE_${index}%%`;
+        }
+    );
 
-        .replace(
-            /\*\*(.+?)\*\*/g,
-            "<strong>$1</strong>"
-        )
+    // Headings
+    result = result
+        .replace(/^### (.+)$/gm, "<h3>$1</h3>")
+        .replace(/^## (.+)$/gm, "<h2>$1</h2>")
+        .replace(/^# (.+)$/gm, "<h1>$1</h1>");
 
-        .replace(
-            /\*(.+?)\*/g,
-            "<em>$1</em>"
-        )
+    // Lists
+    result = result.replace(
+        /^\- (.+)$/gm,
+        "<li>$1</li>"
+    );
 
-        .replace(
-            /(<li>.*<\/li>\n?)+/g,
-            match => `<ul>${match.replace(/\n/g, "")}</ul>`
-        )
+    result = result.replace(
+        /(\<li>.*<\/li>\n?)+/g,
+        match => `<ul>${match.replace(/\n/g, "")}</ul>`
+    );
 
-        .replace(
-            /\r?\n\r?\n/g,
-            "<br><br>"
-        );
+    // Bold
+    result = result.replace(
+        /\*\*(.+?)\*\*/g,
+        "<strong>$1</strong>"
+    );
+
+    // Italic
+    result = result.replace(
+        /\*(.+?)\*/g,
+        "<em>$1</em>"
+    );
+
+    // Restore inline code
+    result = result.replace(
+        /%%CODE_(\d+)%%/g,
+        (_, index) => codeBlocks[Number(index)]
+    );
+
+    // Paragraph spacing
+    result = result.replace(
+        /\r?\n\r?\n/g,
+        "<br><br>"
+    );
+
+    return result;
 }
 
 
