@@ -655,6 +655,12 @@
                     <li class="tree-item"><a href="#imodfiles"><span>IModFiles</span><span class="type-badge badge-interface">Interface</span></a></li>
                     <li class="tree-item"><a href="#imodsettings"><span>IModSettings</span><span class="type-badge badge-interface">Interface</span></a></li>
                     <li class="tree-item"><a href="#imodwindow"><span>IModWindow</span><span class="type-badge badge-interface">Interface</span></a></li>
+                    <li class="tree-item"><a href="#imodclipboard"><span>IModClipboard</span><span class="type-badge badge-interface">Interface</span></a></li>
+                    <li class="tree-item"><a href="#imodribbon"><span>IModRibbon</span><span class="type-badge badge-interface">Interface</span></a></li>
+                    <li class="tree-item"><a href="#modmenuitem"><span>ModMenuItem</span><span class="type-badge badge-class">Class</span></a></li>
+                    <li class="tree-item"><a href="#modribbontab"><span>ModRibbonTab</span><span class="type-badge badge-class">Class</span></a></li>
+                    <li class="tree-item"><a href="#modribbongroup"><span>ModRibbonGroup</span><span class="type-badge badge-class">Class</span></a></li>
+                    <li class="tree-item"><a href="#modribbonbutton"><span>ModRibbonButton</span><span class="type-badge badge-class">Class</span></a></li>
                     <li class="tree-item"><a href="#modinfo"><span>ModInfo</span><span class="type-badge badge-class">Class</span></a></li>
                     <li class="tree-item"><a href="#modpermissionexception"><span>ModPermissionException</span><span class="type-badge badge-exception">Exception</span></a></li>
                 </ul>
@@ -711,7 +717,7 @@
                             <tr>
                                 <td><a href="#imodcontext" class="member-sig">IModContext</a></td>
                                 <td><span class="type-badge badge-interface">Interface</span></td>
-                                <td>Provides access to simulator services, virtual storage, UI loading, and notifications.</td>
+                                <td>Provides access to simulator services, virtual storage, UI loading, dialogs, timers, and notifications.</td>
                             </tr>
                             <tr>
                                 <td><a href="#imodfiles" class="member-sig">IModFiles</a></td>
@@ -726,7 +732,37 @@
                             <tr>
                                 <td><a href="#imodwindow" class="member-sig">IModWindow</a></td>
                                 <td><span class="type-badge badge-interface">Interface</span></td>
-                                <td>Represents the desktop window hosting the app's UI.</td>
+                                <td>Represents the desktop window hosting the app's UI, menu bar, and optional ribbon.</td>
+                            </tr>
+                            <tr>
+                                <td><a href="#imodclipboard" class="member-sig">IModClipboard</a></td>
+                                <td><span class="type-badge badge-interface">Interface</span></td>
+                                <td>Provides read and write access to the system text clipboard.</td>
+                            </tr>
+                            <tr>
+                                <td><a href="#imodribbon" class="member-sig">IModRibbon</a></td>
+                                <td><span class="type-badge badge-interface">Interface</span></td>
+                                <td>Configures tabs, Quick Access buttons, the File menu, and help button on ribbon windows.</td>
+                            </tr>
+                            <tr>
+                                <td><a href="#modmenuitem" class="member-sig">ModMenuItem</a></td>
+                                <td><span class="type-badge badge-class">Class</span></td>
+                                <td>Represents an entry or separator in a menu bar, context menu, drop-down button, or ribbon File menu.</td>
+                            </tr>
+                            <tr>
+                                <td><a href="#modribbontab" class="member-sig">ModRibbonTab</a></td>
+                                <td><span class="type-badge badge-class">Class</span></td>
+                                <td>Represents a standard or contextual tab inside an <a href="#imodribbon"><code>IModRibbon</code></a>.</td>
+                            </tr>
+                            <tr>
+                                <td><a href="#modribbongroup" class="member-sig">ModRibbonGroup</a></td>
+                                <td><span class="type-badge badge-class">Class</span></td>
+                                <td>A titled container of large or stacked buttons inside a <a href="#modribbontab"><code>ModRibbonTab</code></a>.</td>
+                            </tr>
+                            <tr>
+                                <td><a href="#modribbonbutton" class="member-sig">ModRibbonButton</a></td>
+                                <td><span class="type-badge badge-class">Class</span></td>
+                                <td>A ribbon command button supporting icons, glyphs, toggles, checkboxes, and drop-down menus.</td>
                             </tr>
                             <tr>
                                 <td><a href="#modinfo" class="member-sig">ModInfo</a></td>
@@ -762,7 +798,7 @@
 
                 <h3>App.cs</h3>
                 <p>
-                    The main C# entry point containing a class that derives from <code>ModApp</code>. Demonstrates loading XAML, binding live settings, persisting private app data, and posting notifications.
+                    The advanced C# entry point showing ribbon configuration, Quick Access buttons, dialog prompts, UI timers, and live settings.
                 </p>
 
                 <div class="code-block-wrapper">
@@ -774,6 +810,8 @@
                         </button>
                     </div>
                     <pre><code><span class="tok-kw">using</span> System;
+<span class="tok-kw">using</span> System.Collections.Generic;
+<span class="tok-kw">using</span> System.Linq;
 <span class="tok-kw">using</span> System.Windows;
 <span class="tok-kw">using</span> System.Windows.Controls;
 <span class="tok-kw">using</span> Win10Sim.Sdk;
@@ -786,6 +824,10 @@
     {
         <span class="tok-kw">private int</span> _clicks;
         <span class="tok-kw">private</span> <span class="tok-type">TextBlock</span>? _counter;
+        <span class="tok-kw">private</span> <span class="tok-type">TextBox</span>? _editorBox;
+        <span class="tok-kw">private</span> <span class="tok-type">TextBlock</span>? _statusText;
+        <span class="tok-kw">private</span> <span class="tok-type">IDisposable</span>? _timer;
+        <span class="tok-kw">private bool</span> _isAutoClickerActive;
 
         <span class="tok-kw">public override</span> <span class="tok-type">FrameworkElement</span> <span class="tok-method">CreateView</span>(<span class="tok-type">IModContext</span> context)
         {
@@ -794,7 +836,8 @@
 
             <span class="tok-type">TextBlock</span> greeting = context.<span class="tok-method">Find</span>&lt;<span class="tok-type">TextBlock</span>&gt;(view, <span class="tok-str">"GreetingText"</span>)!;
             <span class="tok-type">Button</span> button = context.<span class="tok-method">Find</span>&lt;<span class="tok-type">Button</span>&gt;(view, <span class="tok-str">"ClickButton"</span>)!;
-            <span class="tok-type">TextBlock</span> info = context.<span class="tok-method">Find</span>&lt;<span class="tok-type">TextBlock</span>&gt;(view, <span class="tok-str">"InfoText"</span>)!;
+            _editorBox = context.<span class="tok-method">Find</span>&lt;<span class="tok-type">TextBox</span>&gt;(view, <span class="tok-str">"EditorBox"</span>);
+            _statusText = context.<span class="tok-method">Find</span>&lt;<span class="tok-type">TextBlock</span>&gt;(view, <span class="tok-str">"StatusText"</span>);
             _counter = context.<span class="tok-method">Find</span>&lt;<span class="tok-type">TextBlock</span>&gt;(view, <span class="tok-str">"CounterText"</span>);
 
             <span class="tok-com">// Values from Settings.json: the user edits them in Apps Manager.</span>
@@ -806,8 +849,58 @@
                 <span class="tok-kw">int</span>.<span class="tok-method">TryParse</span>(context.Data.<span class="tok-method">ReadText</span>(<span class="tok-str">"clicks.txt"</span>), <span class="tok-kw">out</span> _clicks);
             <span class="tok-method">UpdateCounter</span>();
 
-            info.Text = context.Info.Name + <span class="tok-str">" "</span> + context.Info.Version + <span class="tok-str">"  -  data: "</span> + context.DataFolder;
+            <span class="tok-kw">if</span> (context.Window.Ribbon <span class="tok-kw">is</span> { } ribbon)
+            {
+                <span class="tok-kw">var</span> saveBtn = <span class="tok-kw">new</span> <span class="tok-type">ModRibbonButton</span>(<span class="tok-str">"Save"</span>, () =&gt; {
+                    context.Data.<span class="tok-method">WriteText</span>(<span class="tok-str">"notes.txt"</span>, _editorBox?.Text ?? <span class="tok-str">""</span>);
+                    <span class="tok-method">SetStatus</span>(<span class="tok-str">"Saved via Ribbon."</span>);
+                }) { Glyph = <span class="tok-str">"\uE74E"</span>, ToolTip = <span class="tok-str">"Save (Ctrl+S)"</span> };
 
+                <span class="tok-kw">var</span> autoClickerBtn = <span class="tok-kw">new</span> <span class="tok-type">ModRibbonButton</span>(<span class="tok-str">"Auto-Clicker"</span>, () =&gt; {
+                    _isAutoClickerActive = !_isAutoClickerActive;
+                    <span class="tok-method">SetStatus</span>(_isAutoClickerActive ? <span class="tok-str">"Auto-clicker running..."</span> : <span class="tok-str">"Auto-clicker paused."</span>);
+                }) { Glyph = <span class="tok-str">"\uE916"</span>, IsToggle = <span class="tok-kw">true</span>, ToolTip = <span class="tok-str">"Toggle background counter ticker"</span> };
+
+                <span class="tok-kw">var</span> homeTab = <span class="tok-kw">new</span> <span class="tok-type">ModRibbonTab</span>(<span class="tok-str">"Home"</span>);
+                homeTab.<span class="tok-method">AddGroup</span>(<span class="tok-str">"Actions"</span>)
+                    .<span class="tok-method">AddLarge</span>(<span class="tok-kw">new</span> <span class="tok-type">ModRibbonButton</span>(<span class="tok-str">"Prompt"</span>, () =&gt; {
+                        context.<span class="tok-method">Prompt</span>(<span class="tok-str">"User Input"</span>, <span class="tok-str">"Enter your name:"</span>, <span class="tok-str">"Guest"</span>, name =&gt; {
+                            <span class="tok-kw">if</span> (!string.<span class="tok-method">IsNullOrEmpty</span>(name)) greeting.Text = <span class="tok-str">"Hello, "</span> + name + <span class="tok-str">"!"</span>;
+                        });
+                    }) { Glyph = <span class="tok-str">"\uE8AC"</span> })
+                    .<span class="tok-method">AddStack</span>(
+                        autoClickerBtn,
+                        <span class="tok-kw">new</span> <span class="tok-type">ModRibbonButton</span>(<span class="tok-str">"Confirm"</span>, () =&gt; {
+                            context.<span class="tok-method">Confirm</span>(<span class="tok-str">"Confirmation"</span>, <span class="tok-str">"Reset click counter?"</span>, confirmed =&gt; {
+                                <span class="tok-kw">if</span> (confirmed) { _clicks = <span class="tok-num">0</span>; <span class="tok-method">UpdateCounter</span>(); }
+                            });
+                        }) { Glyph = <span class="tok-str">"\uE787"</span> },
+                        <span class="tok-kw">new</span> <span class="tok-type">ModRibbonButton</span>(<span class="tok-str">"Picker"</span>, () =&gt; {
+                            context.<span class="tok-method">PickFile</span>(<span class="tok-kw">false</span>, <span class="tok-str">@"C:\Users\User\Documents"</span>, <span class="tok-str">""</span>, path =&gt; {
+                                <span class="tok-kw">if</span> (path != <span class="tok-kw">null</span> &amp;&amp; context.Info.Permissions.<span class="tok-method">Contains</span>(<span class="tok-str">"files"</span>))
+                                    <span class="tok-method">SetStatus</span>(<span class="tok-str">"Picked file: "</span> + path);
+                            });
+                        }) { Glyph = <span class="tok-str">"\uE8E5"</span> }
+                    );
+
+                <span class="tok-kw">var</span> toolsTab = <span class="tok-kw">new</span> <span class="tok-type">ModRibbonTab</span>(<span class="tok-str">"Tools"</span>) { ContextTitle = <span class="tok-str">"Advanced Tools"</span>, ContextColor = <span class="tok-str">"#0078D7"</span> };
+                toolsTab.<span class="tok-method">AddGroup</span>(<span class="tok-str">"Logger"</span>)
+                    .<span class="tok-method">AddLarge</span>(<span class="tok-kw">new</span> <span class="tok-type">ModRibbonButton</span>(<span class="tok-str">"Log Info"</span>, () =&gt; {
+                        context.<span class="tok-method">Log</span>(<span class="tok-str">"User logged info at "</span> + DateTime.Now);
+                        context.<span class="tok-method">Notify</span>(<span class="tok-str">"Template App"</span>, <span class="tok-str">"Timestamp logged to Apps Manager."</span>);
+                    }) { Glyph = <span class="tok-str">"\uE946"</span> });
+
+                ribbon.<span class="tok-method">SetTabs</span>(<span class="tok-kw">new</span>[] { homeTab, toolsTab });
+                ribbon.<span class="tok-method">AddQuickAccessButton</span>(saveBtn);
+                ribbon.<span class="tok-method">SetFileMenu</span>(<span class="tok-kw">new</span>[] {
+                    <span class="tok-kw">new</span> <span class="tok-type">ModMenuItem</span>(<span class="tok-str">"Settings Info"</span>, () =&gt; context.<span class="tok-method">ShowMessage</span>(<span class="tok-str">"Settings"</span>, <span class="tok-str">"Current greeting: "</span> + context.Settings.<span class="tok-method">GetString</span>(<span class="tok-str">"greeting"</span>))),
+                    ModMenuItem.<span class="tok-method">Separator</span>(),
+                    <span class="tok-kw">new</span> <span class="tok-type">ModMenuItem</span>(<span class="tok-str">"Exit App"</span>, () =&gt; context.Window.<span class="tok-method">Close</span>())
+                });
+                ribbon.<span class="tok-method">SetHelp</span>(() =&gt; context.<span class="tok-method">ShowMessage</span>(<span class="tok-str">"Help"</span>, <span class="tok-str">"Explore the ribbon tabs above!"</span>));
+            }
+
+            <span class="tok-com">// Hook click button</span>
             button.Click += (s, e) =&gt;
             {
                 _clicks++;
@@ -822,6 +915,22 @@
                 }
             };
 
+            <span class="tok-com">// Start a UI thread timer (ticks every second)</span>
+            _timer = context.<span class="tok-method">StartTimer</span>(TimeSpan.<span class="tok-method">FromSeconds</span>(<span class="tok-num">1</span>), () =&gt;
+            {
+                <span class="tok-kw">if</span> (_isAutoClickerActive)
+                {
+                    _clicks++;
+                    <span class="tok-method">UpdateCounter</span>();
+                }
+            });
+
+            <span class="tok-com">// Load saved notes if they exist</span>
+            <span class="tok-kw">if</span> (context.Data.<span class="tok-method">Exists</span>(<span class="tok-str">"notes.txt"</span>) &amp;&amp; _editorBox != <span class="tok-kw">null</span>)
+            {
+                _editorBox.Text = context.Data.<span class="tok-method">ReadText</span>(<span class="tok-str">"notes.txt"</span>);
+            }
+
             <span class="tok-kw">return</span> view;
         }
 
@@ -830,9 +939,9 @@
             greeting.Text = context.Settings.<span class="tok-method">GetString</span>(<span class="tok-str">"greeting"</span>, <span class="tok-str">"Hello!"</span>);
             greeting.FontSize = context.Settings.<span class="tok-method">GetString</span>(<span class="tok-str">"textSize"</span>, <span class="tok-str">"Medium"</span>) <span class="tok-kw">switch</span>
             {
-                <span class="tok-str">"Small"</span> =&gt; <span class="tok-num">18</span>,
-                <span class="tok-str">"Large"</span> =&gt; <span class="tok-num">36</span>,
-                _ =&gt; <span class="tok-num">26</span>
+                <span class="tok-str">"Small"</span> =&gt; <span class="tok-num">16</span>,
+                <span class="tok-str">"Large"</span> =&gt; <span class="tok-num">32</span>,
+                _ =&gt; <span class="tok-num">22</span>
             };
         }
 
@@ -841,9 +950,15 @@
             <span class="tok-kw">if</span> (_counter != <span class="tok-kw">null</span>) _counter.Text = <span class="tok-str">"Clicks: "</span> + _clicks;
         }
 
+        <span class="tok-kw">private void</span> <span class="tok-method">SetStatus</span>(<span class="tok-kw">string</span> text)
+        {
+            <span class="tok-kw">if</span> (_statusText != <span class="tok-kw">null</span>) _statusText.Text = text;
+        }
+
         <span class="tok-kw">public override void</span> <span class="tok-method">OnClosed</span>()
         {
-            <span class="tok-com">// Called when the window was closed.</span>
+            <span class="tok-com">// Clean up timer when window closes</span>
+            _timer?.<span class="tok-method">Dispose</span>();
         }
     }
 }</code></pre>
@@ -851,7 +966,7 @@
 
                 <h3>MainView.xaml</h3>
                 <p>
-                    The WPF user interface definition loaded by <code>context.LoadXaml("MainView.xaml")</code>.
+                    The advanced WPF user interface definition featuring a grid header, text notes editor, and status bar.
                 </p>
 
                 <div class="code-block-wrapper">
@@ -871,20 +986,39 @@
 <span class="tok-tag">&lt;Grid</span> <span class="tok-attr">xmlns</span>=<span class="tok-str">"http://schemas.microsoft.com/winfx/2006/xaml/presentation"</span>
       <span class="tok-attr">xmlns:x</span>=<span class="tok-str">"http://schemas.microsoft.com/winfx/2006/xaml"</span>
       <span class="tok-attr">Background</span>=<span class="tok-str">"White"</span><span class="tok-tag">&gt;</span>
-    <span class="tok-tag">&lt;StackPanel</span> <span class="tok-attr">VerticalAlignment</span>=<span class="tok-str">"Center"</span> <span class="tok-attr">HorizontalAlignment</span>=<span class="tok-str">"Center"</span><span class="tok-tag">&gt;</span>
-        <span class="tok-tag">&lt;TextBlock</span> <span class="tok-attr">x:Name</span>=<span class="tok-str">"GreetingText"</span> <span class="tok-attr">Text</span>=<span class="tok-str">"Hello!"</span> <span class="tok-attr">FontSize</span>=<span class="tok-str">"26"</span> <span class="tok-attr">TextWrapping</span>=<span class="tok-str">"Wrap"</span>
-                   <span class="tok-attr">TextAlignment</span>=<span class="tok-str">"Center"</span> <span class="tok-attr">HorizontalAlignment</span>=<span class="tok-str">"Center"</span> <span class="tok-attr">MaxWidth</span>=<span class="tok-str">"440"</span><span class="tok-tag">/&gt;</span>
-        <span class="tok-tag">&lt;TextBlock</span> <span class="tok-attr">x:Name</span>=<span class="tok-str">"CounterText"</span> <span class="tok-attr">Text</span>=<span class="tok-str">"Clicks: 0"</span> <span class="tok-attr">FontSize</span>=<span class="tok-str">"15"</span> <span class="tok-attr">Foreground</span>=<span class="tok-str">"#555555"</span>
-                   <span class="tok-attr">HorizontalAlignment</span>=<span class="tok-str">"Center"</span> <span class="tok-attr">Margin</span>=<span class="tok-str">"0,14,0,0"</span><span class="tok-tag">/&gt;</span>
-        <span class="tok-tag">&lt;Button</span> <span class="tok-attr">x:Name</span>=<span class="tok-str">"ClickButton"</span> <span class="tok-attr">Content</span>=<span class="tok-str">"Click me"</span> <span class="tok-attr">Width</span>=<span class="tok-str">"150"</span> <span class="tok-attr">Height</span>=<span class="tok-str">"34"</span> <span class="tok-attr">Margin</span>=<span class="tok-str">"0,18,0,0"</span><span class="tok-tag">/&gt;</span>
-        <span class="tok-tag">&lt;TextBlock</span> <span class="tok-attr">x:Name</span>=<span class="tok-str">"InfoText"</span> <span class="tok-attr">FontSize</span>=<span class="tok-str">"12"</span> <span class="tok-attr">Foreground</span>=<span class="tok-str">"#888888"</span> <span class="tok-attr">HorizontalAlignment</span>=<span class="tok-str">"Center"</span> <span class="tok-attr">Margin</span>=<span class="tok-str">"0,18,0,0"</span><span class="tok-tag">/&gt;</span>
+    <span class="tok-tag">&lt;Grid.RowDefinitions&gt;</span>
+        <span class="tok-tag">&lt;RowDefinition</span> <span class="tok-attr">Height</span>=<span class="tok-str">"Auto"</span><span class="tok-tag">/&gt;</span>
+        <span class="tok-tag">&lt;RowDefinition</span> <span class="tok-attr">Height</span>=<span class="tok-str">"*"</span><span class="tok-tag">/&gt;</span>
+        <span class="tok-tag">&lt;RowDefinition</span> <span class="tok-attr">Height</span>=<span class="tok-str">"Auto"</span><span class="tok-tag">/&gt;</span>
+    <span class="tok-tag">&lt;/Grid.RowDefinitions&gt;</span>
+
+    <span class="tok-com">&lt;!-- Header Panel --&gt;</span>
+    <span class="tok-tag">&lt;StackPanel</span> <span class="tok-attr">Grid.Row</span>=<span class="tok-str">"0"</span> <span class="tok-attr">Margin</span>=<span class="tok-str">"16,16,16,8"</span><span class="tok-tag">&gt;</span>
+        <span class="tok-tag">&lt;TextBlock</span> <span class="tok-attr">x:Name</span>=<span class="tok-str">"GreetingText"</span> <span class="tok-attr">Text</span>=<span class="tok-str">"Hello!"</span> <span class="tok-attr">FontSize</span>=<span class="tok-str">"22"</span> <span class="tok-attr">FontWeight</span>=<span class="tok-str">"SemiBold"</span> <span class="tok-attr">TextWrapping</span>=<span class="tok-str">"Wrap"</span><span class="tok-tag">/&gt;</span>
+        <span class="tok-tag">&lt;StackPanel</span> <span class="tok-attr">Orientation</span>=<span class="tok-str">"Horizontal"</span> <span class="tok-attr">Margin</span>=<span class="tok-str">"0,8,0,0"</span><span class="tok-tag">&gt;</span>
+            <span class="tok-tag">&lt;TextBlock</span> <span class="tok-attr">x:Name</span>=<span class="tok-str">"CounterText"</span> <span class="tok-attr">Text</span>=<span class="tok-str">"Clicks: 0"</span> <span class="tok-attr">FontSize</span>=<span class="tok-str">"14"</span> <span class="tok-attr">Foreground</span>=<span class="tok-str">"#555555"</span> <span class="tok-attr">VerticalAlignment</span>=<span class="tok-str">"Center"</span><span class="tok-tag">/&gt;</span>
+            <span class="tok-tag">&lt;Button</span> <span class="tok-attr">x:Name</span>=<span class="tok-str">"ClickButton"</span> <span class="tok-attr">Content</span>=<span class="tok-str">"Click me"</span> <span class="tok-attr">Width</span>=<span class="tok-str">"100"</span> <span class="tok-attr">Height</span>=<span class="tok-str">"28"</span> <span class="tok-attr">Margin</span>=<span class="tok-str">"14,0,0,0"</span><span class="tok-tag">/&gt;</span>
+        <span class="tok-tag">&lt;/StackPanel&gt;</span>
     <span class="tok-tag">&lt;/StackPanel&gt;</span>
+
+    <span class="tok-com">&lt;!-- Text Notes Editor --&gt;</span>
+    <span class="tok-tag">&lt;TextBox</span> <span class="tok-attr">x:Name</span>=<span class="tok-str">"EditorBox"</span> <span class="tok-attr">Grid.Row</span>=<span class="tok-str">"1"</span> <span class="tok-attr">Margin</span>=<span class="tok-str">"16,4,16,8"</span>
+             <span class="tok-attr">AcceptsReturn</span>=<span class="tok-str">"True"</span> <span class="tok-attr">TextWrapping</span>=<span class="tok-str">"Wrap"</span>
+             <span class="tok-attr">BorderBrush</span>=<span class="tok-str">"#CCCCCC"</span> <span class="tok-attr">BorderThickness</span>=<span class="tok-str">"1"</span> <span class="tok-attr">Padding</span>=<span class="tok-str">"8"</span>
+             <span class="tok-attr">FontFamily</span>=<span class="tok-str">"Consolas"</span> <span class="tok-attr">FontSize</span>=<span class="tok-str">"13"</span>
+             <span class="tok-attr">VerticalScrollBarVisibility</span>=<span class="tok-str">"Auto"</span>
+             <span class="tok-attr">ToolTip</span>=<span class="tok-str">"Type notes here. Saved automatically to app data folder."</span><span class="tok-tag">/&gt;</span>
+
+    <span class="tok-com">&lt;!-- Status Bar --&gt;</span>
+    <span class="tok-tag">&lt;Border</span> <span class="tok-attr">Grid.Row</span>=<span class="tok-str">"2"</span> <span class="tok-attr">Background</span>=<span class="tok-str">"#F3F3F3"</span> <span class="tok-attr">BorderBrush</span>=<span class="tok-str">"#E0E0E0"</span> <span class="tok-attr">BorderThickness</span>=<span class="tok-str">"0,1,0,0"</span> <span class="tok-attr">Padding</span>=<span class="tok-str">"12,6"</span><span class="tok-tag">&gt;</span>
+        <span class="tok-tag">&lt;TextBlock</span> <span class="tok-attr">x:Name</span>=<span class="tok-str">"StatusText"</span> <span class="tok-attr">Text</span>=<span class="tok-str">"Ready (Try the Ribbon tabs and Menu bar above!)"</span> <span class="tok-attr">FontSize</span>=<span class="tok-str">"11"</span> <span class="tok-attr">Foreground</span>=<span class="tok-str">"#666666"</span><span class="tok-tag">/&gt;</span>
+    <span class="tok-tag">&lt;/Border&gt;</span>
 <span class="tok-tag">&lt;/Grid&gt;</span></code></pre>
                 </div>
 
                 <h3>AppInfo.json</h3>
                 <p>
-                    Defines the app's identity, Start menu tile appearance, Command Prompt launch alias, initial window dimensions, and granted permissions.
+                    Defines the app's identity, version 2.0.0, ribbon window activation, and advanced permissions.
                 </p>
 
                 <div class="code-block-wrapper">
@@ -899,9 +1033,9 @@
   <span class="tok-com">// The id must be unique (lowercase letters, digits, '.', '_' or '-'). Change it for every new app.</span>
   <span class="tok-str">"id"</span>: <span class="tok-str">"template.app"</span>,
   <span class="tok-str">"name"</span>: <span class="tok-str">"Template App"</span>,
-  <span class="tok-str">"version"</span>: <span class="tok-str">"1.0.0"</span>,
+  <span class="tok-str">"version"</span>: <span class="tok-str">"2.0.0"</span>,
   <span class="tok-str">"author"</span>: <span class="tok-str">"You"</span>,
-  <span class="tok-str">"description"</span>: <span class="tok-str">"A small example app: a greeting, a click counter, settings and a notification."</span>,
+  <span class="tok-str">"description"</span>: <span class="tok-str">"An example app with ribbon, menus, clipboard, prompts, and timers."</span>,
 
   <span class="tok-com">// The icon: a .png or .ico file in this folder. Without it the glyph below (Segoe MDL2 Assets) is used.</span>
   <span class="tok-com">// "icon": "icon.png",</span>
@@ -910,23 +1044,24 @@
   <span class="tok-com">// What you type in Command Prompt to start this app. Remove the line and the app can't be started from there.</span>
   <span class="tok-str">"cmdLaunch"</span>: <span class="tok-str">"templateapp"</span>,
 
-  <span class="tok-str">"keywords"</span>: <span class="tok-str">"template sample example"</span>,
-  <span class="tok-str">"tileColor"</span>: <span class="tok-str">"#66808080"</span>,
+  <span class="tok-str">"keywords"</span>: <span class="tok-str">"template sample example ribbon"</span>,
+  <span class="tok-str">"tileColor"</span>: <span class="tok-str">"#0078D7"</span>,
 
   <span class="tok-com">// The class that derives from ModApp. Optional: the first one found is used.</span>
   <span class="tok-str">"entryClass"</span>: <span class="tok-str">"App"</span>,
 
   <span class="tok-str">"window"</span>: {
-    <span class="tok-str">"width"</span>: <span class="tok-num">520</span>,
-    <span class="tok-str">"height"</span>: <span class="tok-num">360</span>,
-    <span class="tok-str">"minWidth"</span>: <span class="tok-num">320</span>,
-    <span class="tok-str">"minHeight"</span>: <span class="tok-num">220</span>,
-    <span class="tok-str">"resizable"</span>: <span class="tok-kw">true</span>
+    <span class="tok-str">"width"</span>: <span class="tok-num">640</span>,
+    <span class="tok-str">"height"</span>: <span class="tok-num">440</span>,
+    <span class="tok-str">"minWidth"</span>: <span class="tok-num">400</span>,
+    <span class="tok-str">"minHeight"</span>: <span class="tok-num">300</span>,
+    <span class="tok-str">"resizable"</span>: <span class="tok-kw">true</span>,
+    <span class="tok-str">"ribbon"</span>: <span class="tok-kw">true</span>
   },
 
-  <span class="tok-com">// What the app may do besides the basics. Known permissions: "files", "notifications".</span>
+  <span class="tok-com">// What the app may do besides the basics. Known permissions: "files", "notifications", "clipboard".</span>
   <span class="tok-com">// Changing this file means the app has to be compiled again in Apps Manager.</span>
-  <span class="tok-str">"permissions"</span>: [ <span class="tok-str">"notifications"</span> ]
+  <span class="tok-str">"permissions"</span>: [ <span class="tok-str">"notifications"</span>, <span class="tok-str">"clipboard"</span>, <span class="tok-str">"files"</span> ]
 }</code></pre>
                 </div>
 
@@ -950,7 +1085,7 @@
       <span class="tok-str">"label"</span>: <span class="tok-str">"Greeting"</span>,
       <span class="tok-str">"description"</span>: <span class="tok-str">"The text at the top of the window."</span>,
       <span class="tok-str">"type"</span>: <span class="tok-str">"string"</span>,
-      <span class="tok-str">"value"</span>: <span class="tok-str">"Hello from the Template App!"</span>
+      <span class="tok-str">"value"</span>: <span class="tok-str">"Hello from the Advanced Template App!"</span>
     },
     {
       <span class="tok-str">"key"</span>: <span class="tok-str">"notifyEvery"</span>,
@@ -964,7 +1099,6 @@
     {
       <span class="tok-str">"key"</span>: <span class="tok-str">"notify"</span>,
       <span class="tok-str">"label"</span>: <span class="tok-str">"Post notifications"</span>,
-      <span class="tok-str">"description"</span>: <span class="tok-str">"A notification is posted every N clicks."</span>,
       <span class="tok-str">"type"</span>: <span class="tok-str">"bool"</span>,
       <span class="tok-str">"value"</span>: <span class="tok-kw">true</span>
     },
@@ -1003,13 +1137,53 @@
                         <tbody>
                             <tr>
                                 <td><code>"files"</code></td>
-                                <td><code>IModContext.Files</code></td>
-                                <td>Grants access to the user's virtual drive folders (<code>C:\Users\User\...</code>). Private app storage (<code>IModContext.Data</code>) requires no permission.</td>
+                                <td><code>IModContext.Files</code>, <code>IModContext.PickFile</code></td>
+                                <td>Grants access to the user's virtual drive folders (<code>C:\Users\User\...</code>) and the Open/Save file picker. Private app storage (<code>IModContext.Data</code>) requires no permission.</td>
                             </tr>
                             <tr>
                                 <td><code>"notifications"</code></td>
                                 <td><code>IModContext.Notify(string, string)</code></td>
                                 <td>Allows posting toast banners and Action Center notifications.</td>
+                            </tr>
+                            <tr>
+                                <td><code>"clipboard"</code></td>
+                                <td><code>IModContext.Clipboard</code></td>
+                                <td>Grants read and write access to the system text clipboard.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Window Options (<code>"window"</code> in AppInfo.json)</h3>
+                <div class="api-table-wrap">
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>Property</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>"width"</code> / <code>"height"</code></td>
+                                <td><code>number</code></td>
+                                <td>Initial dimensions of the app window in pixels.</td>
+                            </tr>
+                            <tr>
+                                <td><code>"minWidth"</code> / <code>"minHeight"</code></td>
+                                <td><code>number</code></td>
+                                <td>Minimum allowed dimensions when resizing the window.</td>
+                            </tr>
+                            <tr>
+                                <td><code>"resizable"</code></td>
+                                <td><code>boolean</code></td>
+                                <td>Determines whether the user can resize or maximize the window.</td>
+                            </tr>
+                            <tr>
+                                <td><code>"ribbon"</code></td>
+                                <td><code>boolean</code></td>
+                                <td>When <code>true</code>, hosts the app in a File Explorer-style ribbon window and populates <a href="#imodwindow"><code>IModWindow.Ribbon</code></a> (otherwise <code>null</code>).</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1118,7 +1292,7 @@
                             </tr>
                             <tr>
                                 <td><strong>Exception Handling</strong></td>
-                                <td>Catch <code>ModPermissionException</code> if calling <code>context.Files</code> or <code>context.Notify</code> when permissions might be omitted.</td>
+                                <td>Catch <code>ModPermissionException</code> if calling <code>context.Files</code>, <code>context.PickFile</code>, <code>context.Clipboard</code>, or <code>context.Notify</code> when permissions might be omitted.</td>
                                 <td><code>try { context.Notify(...); } catch (ModPermissionException) { }</code></td>
                             </tr>
                         </tbody>
@@ -1128,7 +1302,7 @@
                 <h3>Common C# Snippets for SDK Tasks</h3>
                 <div class="code-block-wrapper">
                     <div class="code-block-header">
-                        <span>C# — Images, User Files &amp; Window Control</span>
+                        <span>C# — Images, User Files, Menus &amp; Window Control</span>
                         <button type="button" class="copy-btn" data-copy>
                             <span class="icon" aria-hidden="true">&#xE8C8;</span>
                             <span>Copy</span>
@@ -1156,9 +1330,8 @@
     context.<span class="tok-method">ShowMessage</span>(<span class="tok-str">"Permission Required"</span>, ex.Message);
 }
 
-<span class="tok-com">// 3. Update window title or close the app programmatically</span>
-context.Window.Title = <span class="tok-str">"Document - Edited"</span>;
-<span class="tok-com">// context.Window.Close();</span></code></pre>
+<span class="tok-com">// 3. Update window title and status</span>
+context.Window.Title = <span class="tok-str">"Document - Edited"</span>;</code></pre>
                 </div>
             </section>
 
@@ -1392,7 +1565,7 @@ context.Window.Title = <span class="tok-str">"Document - Edited"</span>;
                             <tr>
                                 <td><span class="member-sig">Data</span></td>
                                 <td><a href="#imodfiles" class="member-type">IModFiles</a></td>
-                                <td>The app's own private folder. <strong>No permission needed.</strong> Relative paths start here.</td>
+                                <td>The app's own private folder. <strong>No permission needed.</strong> Relative paths start there.</td>
                             </tr>
                             <tr>
                                 <td><span class="member-sig">Files</span></td>
@@ -1411,6 +1584,14 @@ context.Window.Title = <span class="tok-str">"Document - Edited"</span>;
                                 <td><span class="member-sig">DataFolder</span></td>
                                 <td><span class="member-type">string</span></td>
                                 <td>The virtual path of <a href="#imodcontext"><code>Data</code></a>.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">Clipboard</span></td>
+                                <td><a href="#imodclipboard" class="member-type">IModClipboard</a></td>
+                                <td>
+                                    The system clipboard.
+                                    <div><span class="perm-pill">Requires "clipboard" permission</span></div>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -1459,6 +1640,34 @@ context.Window.Title = <span class="tok-str">"Document - Edited"</span>;
                                 <td><span class="member-sig">Log(string text)</span></td>
                                 <td><span class="member-type">void</span></td>
                                 <td>Writes a line to the build log shown in <strong>Apps Manager</strong>.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">Confirm(string title, string message, Action&lt;bool&gt; result)</span></td>
+                                <td><span class="member-type">void</span></td>
+                                <td>Asks a Yes / Cancel question. <code>result</code> is called with <code>true</code> when the user confirms.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">Prompt(string title, string message, string defaultText, Action&lt;string?&gt; result)</span></td>
+                                <td><span class="member-type">void</span></td>
+                                <td>Asks for a line of text. <code>result</code> gets the entered text, or <code>null</code> when the user cancels.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">PickFile(bool save, string initialFolder, string defaultFileName, Action&lt;string?&gt; result)</span></td>
+                                <td><span class="member-type">void</span></td>
+                                <td>
+                                    Shows the Open / Save file picker of the simulator. <code>result</code> gets the chosen virtual path (<code>C:\...</code>) or <code>null</code> when cancelled; read or write it with <a href="#imodcontext"><code>Files</code></a>.
+                                    <div><span class="perm-pill">Requires "files" permission</span></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">ShowMenu(FrameworkElement target, IEnumerable&lt;ModMenuItem&gt; items)</span></td>
+                                <td><span class="member-type">void</span></td>
+                                <td>Opens a context menu under <code>target</code>.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">StartTimer(TimeSpan interval, Action tick)</span></td>
+                                <td><span class="member-type">IDisposable</span></td>
+                                <td>Calls <code>tick</code> on the UI thread every <code>interval</code> (at least 50 ms, at most 16 timers per app). Dispose the result to stop it; timers are also stopped when the window closes.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1675,6 +1884,11 @@ context.Window.Title = <span class="tok-str">"Document - Edited"</span>;
                                 <td><span class="member-type">string</span></td>
                                 <td>Gets or sets the title displayed on the app window.</td>
                             </tr>
+                            <tr>
+                                <td><span class="member-sig">Ribbon</span></td>
+                                <td><a href="#imodribbon" class="member-type">IModRibbon?</a></td>
+                                <td>The ribbon of the window, or <code>null</code>. Only apps with <code>"ribbon": true</code> in the <code>"window"</code> section of <code>AppInfo.json</code> get a ribbon window (File Explorer style); all other apps return <code>null</code> here.</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -1694,6 +1908,634 @@ context.Window.Title = <span class="tok-str">"Document - Edited"</span>;
                                 <td><span class="member-sig">Close()</span></td>
                                 <td><span class="member-type">void</span></td>
                                 <td>Closes the app window.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">Minimize()</span></td>
+                                <td><span class="member-type">void</span></td>
+                                <td>Hides the window in the taskbar.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">BringToFront()</span></td>
+                                <td><span class="member-type">void</span></td>
+                                <td>Puts the window in front of the other windows.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">SetMenu(IEnumerable&lt;ModMenuItem&gt; items)</span></td>
+                                <td><span class="member-type">void</span></td>
+                                <td>Sets the classic menu bar under the title bar (File, Edit, Help ...). Pass an empty list to remove it. Top-level items are the headers; their <a href="#modmenuitem"><code>ModMenuItem.Items</code></a> are the drop-down.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- IMODCLIPBOARD INTERFACE -->
+            <section id="imodclipboard">
+                <h2>
+                    <span>IModClipboard Interface</span>
+                    <span class="type-badge badge-interface">Interface</span>
+                </h2>
+
+                <div class="definition-card">
+                    <div class="definition-row">
+                        <span class="definition-label">Namespace</span>
+                        <span><code>Win10Sim.Sdk</code></span>
+                    </div>
+                </div>
+
+                <p>
+                    The system clipboard (text only). Accessed via <code>IModContext.Clipboard</code>. Needs the <code>"clipboard"</code> permission in <code>AppInfo.json</code>.
+                </p>
+
+                <div class="code-block-wrapper">
+                    <div class="code-block-header">
+                        <span>C# — Declaration</span>
+                        <button type="button" class="copy-btn" data-copy>
+                            <span class="icon" aria-hidden="true">&#xE8C8;</span>
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                    <pre><code><span class="tok-kw">public interface</span> <span class="tok-type">IModClipboard</span></code></pre>
+                </div>
+
+                <h3>Properties</h3>
+                <div class="api-table-wrap">
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>Property</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="member-sig">HasText</span></td>
+                                <td><span class="member-type">bool</span></td>
+                                <td>Returns <code>true</code> if the clipboard currently contains text.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Methods</h3>
+                <div class="api-table-wrap">
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Returns</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="member-sig">GetText()</span></td>
+                                <td><span class="member-type">string</span></td>
+                                <td>Reads and returns the text currently stored on the clipboard.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">SetText(string text)</span></td>
+                                <td><span class="member-type">void</span></td>
+                                <td>Copies <code>text</code> to the system clipboard.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- IMODRIBBON INTERFACE -->
+            <section id="imodribbon">
+                <h2>
+                    <span>IModRibbon Interface</span>
+                    <span class="type-badge badge-interface">Interface</span>
+                </h2>
+
+                <div class="definition-card">
+                    <div class="definition-row">
+                        <span class="definition-label">Namespace</span>
+                        <span><code>Win10Sim.Sdk</code></span>
+                    </div>
+                </div>
+
+                <p>
+                    The ribbon of a window (see <a href="#imodwindow"><code>IModWindow.Ribbon</code></a>). Available when <code>"ribbon": true</code> is configured under <code>"window"</code> in <code>AppInfo.json</code>.
+                </p>
+
+                <div class="code-block-wrapper">
+                    <div class="code-block-header">
+                        <span>C# — Declaration</span>
+                        <button type="button" class="copy-btn" data-copy>
+                            <span class="icon" aria-hidden="true">&#xE8C8;</span>
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                    <pre><code><span class="tok-kw">public interface</span> <span class="tok-type">IModRibbon</span></code></pre>
+                </div>
+
+                <h3>Properties</h3>
+                <div class="api-table-wrap">
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>Property</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="member-sig">IsCollapsed</span></td>
+                                <td><span class="member-type">bool</span></td>
+                                <td>Gets or sets whether the ribbon is minimized (<code>true</code> when only the tab names are visible).</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Methods</h3>
+                <div class="api-table-wrap">
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Returns</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="member-sig">SetTabs(IEnumerable&lt;ModRibbonTab&gt; tabs, string? selectedHeader = null)</span></td>
+                                <td><span class="member-type">void</span></td>
+                                <td>Replaces the ribbon tabs. The selected tab stays selected when a tab with the same header still exists.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">SelectTab(string header)</span></td>
+                                <td><span class="member-type">void</span></td>
+                                <td>Selects a tab by its header and opens the ribbon if it was minimized.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">AddQuickAccessButton(ModRibbonButton button)</span></td>
+                                <td><span class="member-type">void</span></td>
+                                <td>Adds a small button to the Quick Access Toolbar in the title bar.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">SetFileMenu(IEnumerable&lt;ModMenuItem&gt; items)</span></td>
+                                <td><span class="member-type">void</span></td>
+                                <td>Sets the drop-down of the blue "File" tab. A separator item draws a line.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">SetHelp(Action? action)</span></td>
+                                <td><span class="member-type">void</span></td>
+                                <td>Shows a <code>?</code> button at the right end of the tab strip. Pass <code>null</code> to remove it.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- MODMENUITEM CLASS -->
+            <section id="modmenuitem">
+                <h2>
+                    <span>ModMenuItem Class</span>
+                    <span class="type-badge badge-class">Class</span>
+                </h2>
+
+                <div class="definition-card">
+                    <div class="definition-row">
+                        <span class="definition-label">Namespace</span>
+                        <span><code>Win10Sim.Sdk</code></span>
+                    </div>
+                    <div class="definition-row">
+                        <span class="definition-label">Inheritance</span>
+                        <span><code>Object</code> → <code>ModMenuItem</code></span>
+                    </div>
+                </div>
+
+                <p>
+                    One entry of a menu: the menu bar, a drop-down button, a context menu, or the ribbon's File menu. An item with <a href="#modmenuitem"><code>Items</code></a> opens a submenu instead of running <code>Click</code>.
+                </p>
+
+                <div class="code-block-wrapper">
+                    <div class="code-block-header">
+                        <span>C# — Declaration</span>
+                        <button type="button" class="copy-btn" data-copy>
+                            <span class="icon" aria-hidden="true">&#xE8C8;</span>
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                    <pre><code><span class="tok-kw">public sealed class</span> <span class="tok-type">ModMenuItem</span></code></pre>
+                </div>
+
+                <h3>Constructors</h3>
+                <div class="api-table-wrap">
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>Constructor</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="member-sig">ModMenuItem(string text, Action? click = null)</span></td>
+                                <td>Initializes a new menu item with the specified label and optional click callback.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Properties</h3>
+                <div class="api-table-wrap">
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>Property</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="member-sig">Text</span></td>
+                                <td><span class="member-type">string</span></td>
+                                <td>Gets or sets the display text of the menu item.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">Click</span></td>
+                                <td><span class="member-type">Action?</span></td>
+                                <td>Gets or sets the action invoked when the item is clicked (ignored if <code>Items</code> is non-empty).</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">IsChecked</span></td>
+                                <td><span class="member-type">bool</span></td>
+                                <td>Gets or sets whether a checkmark is displayed next to the item.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">IsEnabled</span></td>
+                                <td><span class="member-type">bool</span></td>
+                                <td>Gets or sets whether the item can be clicked (default: <code>true</code>).</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">Shortcut</span></td>
+                                <td><span class="member-type">string?</span></td>
+                                <td>Text shown at the right edge (for example <code>"Ctrl+S"</code>). Display-only: hook keyboard shortcuts yourself.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">Items</span></td>
+                                <td><span class="member-type">List&lt;ModMenuItem&gt;</span></td>
+                                <td>Child items forming a submenu.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">IsSeparator</span></td>
+                                <td><span class="member-type">bool</span></td>
+                                <td><code>true</code> if this item was created via <code>Separator()</code>.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Methods</h3>
+                <div class="api-table-wrap">
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Returns</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="member-sig">Separator()</span></td>
+                                <td><span class="member-type">ModMenuItem</span></td>
+                                <td><strong>Static.</strong> Creates a thin separator line between two groups of items.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">Add(ModMenuItem child)</span></td>
+                                <td><span class="member-type">ModMenuItem</span></td>
+                                <td>Adds a sub-item to <code>Items</code> and returns this instance so calls can be chained.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- MODRIBBONTAB CLASS -->
+            <section id="modribbontab">
+                <h2>
+                    <span>ModRibbonTab Class</span>
+                    <span class="type-badge badge-class">Class</span>
+                </h2>
+
+                <div class="definition-card">
+                    <div class="definition-row">
+                        <span class="definition-label">Namespace</span>
+                        <span><code>Win10Sim.Sdk</code></span>
+                    </div>
+                    <div class="definition-row">
+                        <span class="definition-label">Inheritance</span>
+                        <span><code>Object</code> → <code>ModRibbonTab</code></span>
+                    </div>
+                </div>
+
+                <p>
+                    One tab of the ribbon (Home, View ...).
+                </p>
+
+                <div class="code-block-wrapper">
+                    <div class="code-block-header">
+                        <span>C# — Declaration</span>
+                        <button type="button" class="copy-btn" data-copy>
+                            <span class="icon" aria-hidden="true">&#xE8C8;</span>
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                    <pre><code><span class="tok-kw">public sealed class</span> <span class="tok-type">ModRibbonTab</span></code></pre>
+                </div>
+
+                <h3>Constructors</h3>
+                <div class="api-table-wrap">
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>Constructor</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="member-sig">ModRibbonTab(string header)</span></td>
+                                <td>Initializes a new ribbon tab with the specified header title.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Properties</h3>
+                <div class="api-table-wrap">
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>Property</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="member-sig">Header</span></td>
+                                <td><span class="member-type">string</span></td>
+                                <td>The display title of the tab.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">Groups</span></td>
+                                <td><span class="member-type">List&lt;ModRibbonGroup&gt;</span></td>
+                                <td>The titled command groups contained within this tab.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">ContextTitle</span></td>
+                                <td><span class="member-type">string?</span></td>
+                                <td>Makes this a contextual tab (like <code>"Picture Tools"</code>): the title is drawn in a coloured band in the title bar above the tab. Tabs with the same title and colour share one band.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">ContextColor</span></td>
+                                <td><span class="member-type">string?</span></td>
+                                <td>Colour of the contextual band in <code>"#RRGGBB"</code> format (default: orchid).</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Methods</h3>
+                <div class="api-table-wrap">
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Returns</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="member-sig">AddGroup(string title)</span></td>
+                                <td><a href="#modribbongroup" class="member-type">ModRibbonGroup</a></td>
+                                <td>Creates a new <a href="#modribbongroup"><code>ModRibbonGroup</code></a> with the specified title, adds it to <code>Groups</code>, and returns it.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- MODRIBBONGROUP CLASS -->
+            <section id="modribbongroup">
+                <h2>
+                    <span>ModRibbonGroup Class</span>
+                    <span class="type-badge badge-class">Class</span>
+                </h2>
+
+                <div class="definition-card">
+                    <div class="definition-row">
+                        <span class="definition-label">Namespace</span>
+                        <span><code>Win10Sim.Sdk</code></span>
+                    </div>
+                    <div class="definition-row">
+                        <span class="definition-label">Inheritance</span>
+                        <span><code>Object</code> → <code>ModRibbonGroup</code></span>
+                    </div>
+                </div>
+
+                <p>
+                    A titled box of buttons inside a <a href="#modribbontab"><code>ModRibbonTab</code></a>.
+                </p>
+
+                <div class="code-block-wrapper">
+                    <div class="code-block-header">
+                        <span>C# — Declaration</span>
+                        <button type="button" class="copy-btn" data-copy>
+                            <span class="icon" aria-hidden="true">&#xE8C8;</span>
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                    <pre><code><span class="tok-kw">public sealed class</span> <span class="tok-type">ModRibbonGroup</span></code></pre>
+                </div>
+
+                <h3>Constructors</h3>
+                <div class="api-table-wrap">
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>Constructor</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="member-sig">ModRibbonGroup(string title)</span></td>
+                                <td>Initializes a new ribbon group with the specified bottom caption.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Properties</h3>
+                <div class="api-table-wrap">
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>Property</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="member-sig">Title</span></td>
+                                <td><span class="member-type">string</span></td>
+                                <td>The title displayed along the bottom of the group.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Methods</h3>
+                <div class="api-table-wrap">
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Returns</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="member-sig">AddLarge(ModRibbonButton button)</span></td>
+                                <td><a href="#modribbongroup" class="member-type">ModRibbonGroup</a></td>
+                                <td>Adds a big button (icon above its label) and returns this group for chaining.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">AddStack(params ModRibbonButton[] buttons)</span></td>
+                                <td><a href="#modribbongroup" class="member-type">ModRibbonGroup</a></td>
+                                <td>Adds a column of up to three small buttons (icon beside its label) and returns this group for chaining.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- MODRIBBONBUTTON CLASS -->
+            <section id="modribbonbutton">
+                <h2>
+                    <span>ModRibbonButton Class</span>
+                    <span class="type-badge badge-class">Class</span>
+                </h2>
+
+                <div class="definition-card">
+                    <div class="definition-row">
+                        <span class="definition-label">Namespace</span>
+                        <span><code>Win10Sim.Sdk</code></span>
+                    </div>
+                    <div class="definition-row">
+                        <span class="definition-label">Inheritance</span>
+                        <span><code>Object</code> → <code>ModRibbonButton</code></span>
+                    </div>
+                </div>
+
+                <p>
+                    A ribbon command. The same instance can be put in a tab and in the Quick Access Toolbar: changing a property (<code>Text</code>, <code>IsEnabled</code>, <code>IsChecked</code>, etc.) updates every place it is shown.
+                </p>
+
+                <div class="code-block-wrapper">
+                    <div class="code-block-header">
+                        <span>C# — Declaration</span>
+                        <button type="button" class="copy-btn" data-copy>
+                            <span class="icon" aria-hidden="true">&#xE8C8;</span>
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                    <pre><code><span class="tok-kw">public sealed class</span> <span class="tok-type">ModRibbonButton</span></code></pre>
+                </div>
+
+                <h3>Constructors</h3>
+                <div class="api-table-wrap">
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>Constructor</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="member-sig">ModRibbonButton(string text, Action? click = null)</span></td>
+                                <td>Initializes a new ribbon command button with the specified label and optional click handler.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Properties</h3>
+                <div class="api-table-wrap">
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>Property</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="member-sig">Text</span></td>
+                                <td><span class="member-type">string</span></td>
+                                <td>Gets or sets the button label.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">Glyph</span></td>
+                                <td><span class="member-type">string?</span></td>
+                                <td>One character of the <code>"Segoe MDL2 Assets"</code> font, used when there is no <code>Icon</code>.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">Icon</span></td>
+                                <td><span class="member-type">ImageSource?</span></td>
+                                <td>A picture from <a href="#imodcontext"><code>IModContext.LoadImage</code></a> (use a 32 px icon).</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">ToolTip</span></td>
+                                <td><span class="member-type">string?</span></td>
+                                <td>Gets or sets the tooltip shown when hovering over the button.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">Click</span></td>
+                                <td><span class="member-type">Action?</span></td>
+                                <td>Gets or sets the callback invoked when the button is clicked.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">IsToggle</span></td>
+                                <td><span class="member-type">bool</span></td>
+                                <td>When <code>true</code>, stays pressed after a click; read <code>IsChecked</code> in the click handler.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">IsCheckBox</span></td>
+                                <td><span class="member-type">bool</span></td>
+                                <td>Small (stacked) buttons only: draws a check box instead of an icon.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">IsEnabled</span></td>
+                                <td><span class="member-type">bool</span></td>
+                                <td>Gets or sets whether the button is interactive (default: <code>true</code>).</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">IsChecked</span></td>
+                                <td><span class="member-type">bool</span></td>
+                                <td>Gets or sets the checked/pressed state of toggle or checkbox buttons.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">Menu</span></td>
+                                <td><span class="member-type">List&lt;ModMenuItem&gt;</span></td>
+                                <td>When non-empty, the button becomes a drop-down: clicking opens this menu instead of calling <code>Click</code>.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1772,7 +2614,7 @@ context.Window.Title = <span class="tok-str">"Document - Edited"</span>;
                             <tr>
                                 <td><span class="member-sig">Permissions</span></td>
                                 <td><span class="member-type">IReadOnlyList&lt;string&gt;</span></td>
-                                <td>The permissions granted in <code>AppInfo.json</code> (<code>"files"</code>, <code>"notifications"</code>).</td>
+                                <td>The permissions granted in <code>AppInfo.json</code> (<code>"files"</code>, <code>"notifications"</code>, <code>"clipboard"</code>).</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1847,6 +2689,12 @@ context.Window.Title = <span class="tok-str">"Document - Edited"</span>;
                 <li><a href="#imodfiles">IModFiles Interface</a></li>
                 <li><a href="#imodsettings">IModSettings Interface</a></li>
                 <li><a href="#imodwindow">IModWindow Interface</a></li>
+                <li><a href="#imodclipboard">IModClipboard Interface</a></li>
+                <li><a href="#imodribbon">IModRibbon Interface</a></li>
+                <li><a href="#modmenuitem">ModMenuItem Class</a></li>
+                <li><a href="#modribbontab">ModRibbonTab Class</a></li>
+                <li><a href="#modribbongroup">ModRibbonGroup Class</a></li>
+                <li><a href="#modribbonbutton">ModRibbonButton Class</a></li>
                 <li><a href="#modinfo">ModInfo Class</a></li>
                 <li><a href="#modpermissionexception">ModPermissionException</a></li>
             </ul>
