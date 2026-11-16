@@ -656,6 +656,10 @@
                     <li class="tree-item"><a href="#imodsettings"><span>IModSettings</span><span class="type-badge badge-interface">Interface</span></a></li>
                     <li class="tree-item"><a href="#imodwindow"><span>IModWindow</span><span class="type-badge badge-interface">Interface</span></a></li>
                     <li class="tree-item"><a href="#imodclipboard"><span>IModClipboard</span><span class="type-badge badge-interface">Interface</span></a></li>
+                    <li class="tree-item"><a href="#imoddragdrop"><span>IModDragDrop</span><span class="type-badge badge-interface">Interface</span></a></li>
+                    <li class="tree-item"><a href="#moddragdata"><span>ModDragData</span><span class="type-badge badge-class">Class</span></a></li>
+                    <li class="tree-item"><a href="#moddrageffect"><span>ModDragEffect</span><span class="type-badge badge-class">Enum</span></a></li>
+                    <li class="tree-item"><a href="#modbsodtype"><span>ModBsodType</span><span class="type-badge badge-class">Enum</span></a></li>
                     <li class="tree-item"><a href="#imodribbon"><span>IModRibbon</span><span class="type-badge badge-interface">Interface</span></a></li>
                     <li class="tree-item"><a href="#modmenuitem"><span>ModMenuItem</span><span class="type-badge badge-class">Class</span></a></li>
                     <li class="tree-item"><a href="#modribbontab"><span>ModRibbonTab</span><span class="type-badge badge-class">Class</span></a></li>
@@ -740,6 +744,26 @@
                                 <td>Provides read and write access to the system text clipboard.</td>
                             </tr>
                             <tr>
+                                <td><a href="#imoddragdrop" class="member-sig">IModDragDrop</a></td>
+                                <td><span class="type-badge badge-interface">Interface</span></td>
+                                <td>Drag and drop between the elements of the app window (<code>IModContext.DragDrop</code>). Needs no permission.</td>
+                            </tr>
+                            <tr>
+                                <td><a href="#moddragdata" class="member-sig">ModDragData</a></td>
+                                <td><span class="type-badge badge-class">Class</span></td>
+                                <td>The text and object a drag carries from a drag source to a drop target.</td>
+                            </tr>
+                            <tr>
+                                <td><a href="#moddrageffect" class="member-sig">ModDragEffect</a></td>
+                                <td><span class="type-badge badge-class">Enum</span></td>
+                                <td>What a drag may do with its data: <code>None</code>, <code>Copy</code>, <code>Move</code> (flags).</td>
+                            </tr>
+                            <tr>
+                                <td><a href="#modbsodtype" class="member-sig">ModBsodType</a></td>
+                                <td><span class="type-badge badge-class">Enum</span></td>
+                                <td>The ready-made blue screens for <code>IModContext.TriggerBsod</code>.</td>
+                            </tr>
+                            <tr>
                                 <td><a href="#imodribbon" class="member-sig">IModRibbon</a></td>
                                 <td><span class="type-badge badge-interface">Interface</span></td>
                                 <td>Configures tabs, Quick Access buttons, the File menu, and help button on ribbon windows.</td>
@@ -798,7 +822,7 @@
 
                 <h3>App.cs</h3>
                 <p>
-                    The advanced C# entry point showing ribbon configuration, Quick Access buttons, dialog prompts, UI timers, and live settings.
+                    The advanced C# entry point showing ribbon configuration, Quick Access buttons, dialog prompts, UI timers, live settings, drag and drop between elements, title bar options (<code>TitleBarHeight</code>, <code>CaptionButtonWidth</code>, <code>UserClassicButtons</code>) and the blue screen (<code>TriggerBsod</code>).
                 </p>
 
                 <div class="code-block-wrapper">
@@ -814,6 +838,7 @@
 <span class="tok-kw">using</span> System.Linq;
 <span class="tok-kw">using</span> System.Windows;
 <span class="tok-kw">using</span> System.Windows.Controls;
+<span class="tok-kw">using</span> System.Windows.Media;
 <span class="tok-kw">using</span> Win10Sim.Sdk;
 
 <span class="tok-kw">namespace</span> TemplateApp
@@ -840,6 +865,8 @@
             _statusText = context.<span class="tok-method">Find</span>&lt;<span class="tok-type">TextBlock</span>&gt;(view, <span class="tok-str">"StatusText"</span>);
             _counter = context.<span class="tok-method">Find</span>&lt;<span class="tok-type">TextBlock</span>&gt;(view, <span class="tok-str">"CounterText"</span>);
 
+            <span class="tok-method">SetupDragAndDrop</span>(context, view);
+
             <span class="tok-com">// Values from Settings.json: the user edits them in Apps Manager.</span>
             <span class="tok-method">ApplySettings</span>(context, greeting);
             context.Settings.Changed += key =&gt; <span class="tok-method">ApplySettings</span>(context, greeting);
@@ -854,47 +881,80 @@
                 <span class="tok-kw">var</span> saveBtn = <span class="tok-kw">new</span> <span class="tok-type">ModRibbonButton</span>(<span class="tok-str">"Save"</span>, () =&gt; {
                     context.Data.<span class="tok-method">WriteText</span>(<span class="tok-str">"notes.txt"</span>, _editorBox?.Text ?? <span class="tok-str">""</span>);
                     <span class="tok-method">SetStatus</span>(<span class="tok-str">"Saved via Ribbon."</span>);
-                }) { Glyph = <span class="tok-str">"\uE74E"</span>, ToolTip = <span class="tok-str">"Save (Ctrl+S)"</span> };
+                }) { <span class="tok-type">Glyph</span> = <span class="tok-str">"\uE74E"</span>, <span class="tok-type">ToolTip</span> = <span class="tok-str">"Save (Ctrl+S)"</span> };
 
                 <span class="tok-kw">var</span> autoClickerBtn = <span class="tok-kw">new</span> <span class="tok-type">ModRibbonButton</span>(<span class="tok-str">"Auto-Clicker"</span>, () =&gt; {
                     _isAutoClickerActive = !_isAutoClickerActive;
                     <span class="tok-method">SetStatus</span>(_isAutoClickerActive ? <span class="tok-str">"Auto-clicker running..."</span> : <span class="tok-str">"Auto-clicker paused."</span>);
-                }) { Glyph = <span class="tok-str">"\uE916"</span>, IsToggle = <span class="tok-kw">true</span>, ToolTip = <span class="tok-str">"Toggle background counter ticker"</span> };
+                }) { <span class="tok-type">Glyph</span> = <span class="tok-str">"\uE916"</span>, <span class="tok-type">IsToggle</span> = <span class="tok-kw">true</span>, <span class="tok-type">ToolTip</span> = <span class="tok-str">"Toggle background counter ticker"</span> };
 
                 <span class="tok-kw">var</span> homeTab = <span class="tok-kw">new</span> <span class="tok-type">ModRibbonTab</span>(<span class="tok-str">"Home"</span>);
                 homeTab.<span class="tok-method">AddGroup</span>(<span class="tok-str">"Actions"</span>)
                     .<span class="tok-method">AddLarge</span>(<span class="tok-kw">new</span> <span class="tok-type">ModRibbonButton</span>(<span class="tok-str">"Prompt"</span>, () =&gt; {
                         context.<span class="tok-method">Prompt</span>(<span class="tok-str">"User Input"</span>, <span class="tok-str">"Enter your name:"</span>, <span class="tok-str">"Guest"</span>, name =&gt; {
-                            <span class="tok-kw">if</span> (!string.<span class="tok-method">IsNullOrEmpty</span>(name)) greeting.Text = <span class="tok-str">"Hello, "</span> + name + <span class="tok-str">"!"</span>;
+                            <span class="tok-kw">if</span> (!<span class="tok-kw">string</span>.<span class="tok-method">IsNullOrEmpty</span>(name)) greeting.Text = <span class="tok-str">"Hello, "</span> + name + <span class="tok-str">"!"</span>;
                         });
-                    }) { Glyph = <span class="tok-str">"\uE8AC"</span> })
+                    }) { <span class="tok-type">Glyph</span> = <span class="tok-str">"\uE8AC"</span> })
                     .<span class="tok-method">AddStack</span>(
                         autoClickerBtn,
                         <span class="tok-kw">new</span> <span class="tok-type">ModRibbonButton</span>(<span class="tok-str">"Confirm"</span>, () =&gt; {
                             context.<span class="tok-method">Confirm</span>(<span class="tok-str">"Confirmation"</span>, <span class="tok-str">"Reset click counter?"</span>, confirmed =&gt; {
                                 <span class="tok-kw">if</span> (confirmed) { _clicks = <span class="tok-num">0</span>; <span class="tok-method">UpdateCounter</span>(); }
                             });
-                        }) { Glyph = <span class="tok-str">"\uE787"</span> },
+                        }) { <span class="tok-type">Glyph</span> = <span class="tok-str">"\uE787"</span> },
                         <span class="tok-kw">new</span> <span class="tok-type">ModRibbonButton</span>(<span class="tok-str">"Picker"</span>, () =&gt; {
-                            context.<span class="tok-method">PickFile</span>(<span class="tok-kw">false</span>, <span class="tok-str">@"C:\Users\User\Documents"</span>, <span class="tok-str">""</span>, path =&gt; {
+                            context.<span class="tok-method">PickFile</span>(<span class="tok-kw">false</span>, @<span class="tok-str">"C:\Users\User\Documents"</span>, <span class="tok-str">""</span>, path =&gt; {
                                 <span class="tok-kw">if</span> (path != <span class="tok-kw">null</span> &amp;&amp; context.Info.Permissions.<span class="tok-method">Contains</span>(<span class="tok-str">"files"</span>))
                                     <span class="tok-method">SetStatus</span>(<span class="tok-str">"Picked file: "</span> + path);
                             });
-                        }) { Glyph = <span class="tok-str">"\uE8E5"</span> }
+                        }) { <span class="tok-type">Glyph</span> = <span class="tok-str">"\uE8E5"</span> }
                     );
 
-                <span class="tok-kw">var</span> toolsTab = <span class="tok-kw">new</span> <span class="tok-type">ModRibbonTab</span>(<span class="tok-str">"Tools"</span>) { ContextTitle = <span class="tok-str">"Advanced Tools"</span>, ContextColor = <span class="tok-str">"#0078D7"</span> };
+                <span class="tok-kw">var</span> toolsTab = <span class="tok-kw">new</span> <span class="tok-type">ModRibbonTab</span>(<span class="tok-str">"Tools"</span>) { <span class="tok-type">ContextTitle</span> = <span class="tok-str">"Advanced Tools"</span>, <span class="tok-type">ContextColor</span> = <span class="tok-str">"#0078D7"</span> };
                 toolsTab.<span class="tok-method">AddGroup</span>(<span class="tok-str">"Logger"</span>)
                     .<span class="tok-method">AddLarge</span>(<span class="tok-kw">new</span> <span class="tok-type">ModRibbonButton</span>(<span class="tok-str">"Log Info"</span>, () =&gt; {
-                        context.<span class="tok-method">Log</span>(<span class="tok-str">"User logged info at "</span> + DateTime.Now);
+                        context.<span class="tok-method">Log</span>(<span class="tok-str">"User logged info at "</span> + <span class="tok-type">DateTime</span>.Now);
                         context.<span class="tok-method">Notify</span>(<span class="tok-str">"Template App"</span>, <span class="tok-str">"Timestamp logged to Apps Manager."</span>);
-                    }) { Glyph = <span class="tok-str">"\uE946"</span> });
+                    }) { <span class="tok-type">Glyph</span> = <span class="tok-str">"\uE946"</span> });
+
+                <span class="tok-com">// Window options: a taller title bar (the caption buttons adapt), square buttons and the classic button sizes</span>
+                <span class="tok-type">ModRibbonButton</span>? tallTitleBar = <span class="tok-kw">null</span>;
+                tallTitleBar = <span class="tok-kw">new</span> <span class="tok-type">ModRibbonButton</span>(<span class="tok-str">"Tall title bar"</span>, () =&gt;
+                {
+                    context.Window.TitleBarHeight = tallTitleBar!.IsChecked ? <span class="tok-num">40</span> : <span class="tok-num">30</span>;
+                }) { <span class="tok-type">Glyph</span> = <span class="tok-str">"\uE740"</span>, <span class="tok-type">IsToggle</span> = <span class="tok-kw">true</span>, <span class="tok-type">ToolTip</span> = <span class="tok-str">"Window.TitleBarHeight (24 to 80)"</span> };
+
+                <span class="tok-type">ModRibbonButton</span>? squareButtons = <span class="tok-kw">null</span>;
+                squareButtons = <span class="tok-kw">new</span> <span class="tok-type">ModRibbonButton</span>(<span class="tok-str">"Square buttons"</span>, () =&gt;
+                {
+                    context.Window.CaptionButtonWidth = squareButtons!.IsChecked ? context.Window.TitleBarHeight : <span class="tok-kw">double</span>.NaN;
+                }) { <span class="tok-type">Glyph</span> = <span class="tok-str">"\uE739"</span>, <span class="tok-type">IsToggle</span> = <span class="tok-kw">true</span>, <span class="tok-type">ToolTip</span> = <span class="tok-str">"Window.CaptionButtonWidth (NaN = automatic)"</span> };
+
+                <span class="tok-type">ModRibbonButton</span>? classicButtons = <span class="tok-kw">null</span>;
+                classicButtons = <span class="tok-kw">new</span> <span class="tok-type">ModRibbonButton</span>(<span class="tok-str">"Classic buttons"</span>, () =&gt;
+                {
+                    context.Window.UserClassicButtons = classicButtons!.IsChecked;
+                }) { <span class="tok-type">Glyph</span> = <span class="tok-str">"\uE8A7"</span>, <span class="tok-type">IsToggle</span> = <span class="tok-kw">true</span>, <span class="tok-type">ToolTip</span> = <span class="tok-str">"Window.UserClassicButtons"</span> };
+
+                <span class="tok-com">// Needs "bsod" in "permissions" (AppInfo.json). Crashes the simulated PC, then it restarts.</span>
+                <span class="tok-kw">var</span> crashBtn = <span class="tok-kw">new</span> <span class="tok-type">ModRibbonButton</span>(<span class="tok-str">"Blue screen"</span>, () =&gt;
+                {
+                    context.<span class="tok-method">Confirm</span>(<span class="tok-str">"Blue screen"</span>, <span class="tok-str">"Crash the simulated PC? Everything open will be lost."</span>, confirmed =&gt;
+                    {
+                        <span class="tok-kw">if</span> (!confirmed) <span class="tok-kw">return</span>;
+
+                        <span class="tok-kw">try</span> { context.<span class="tok-method">TriggerBsod</span>(<span class="tok-type">ModBsodType</span>.CriticalProcessDied); }
+                        <span class="tok-kw">catch</span> (<span class="tok-type">ModPermissionException</span> ex) { context.<span class="tok-method">ShowMessage</span>(<span class="tok-str">"Permission Required"</span>, ex.Message); }
+                    });
+                }) { <span class="tok-type">Glyph</span> = <span class="tok-str">"\uE783"</span>, <span class="tok-type">ToolTip</span> = <span class="tok-str">"IModContext.TriggerBsod"</span> };
+
+                toolsTab.<span class="tok-method">AddGroup</span>(<span class="tok-str">"Window"</span>).<span class="tok-method">AddStack</span>(tallTitleBar, squareButtons, classicButtons, crashBtn);
 
                 ribbon.<span class="tok-method">SetTabs</span>(<span class="tok-kw">new</span>[] { homeTab, toolsTab });
                 ribbon.<span class="tok-method">AddQuickAccessButton</span>(saveBtn);
                 ribbon.<span class="tok-method">SetFileMenu</span>(<span class="tok-kw">new</span>[] {
                     <span class="tok-kw">new</span> <span class="tok-type">ModMenuItem</span>(<span class="tok-str">"Settings Info"</span>, () =&gt; context.<span class="tok-method">ShowMessage</span>(<span class="tok-str">"Settings"</span>, <span class="tok-str">"Current greeting: "</span> + context.Settings.<span class="tok-method">GetString</span>(<span class="tok-str">"greeting"</span>))),
-                    ModMenuItem.<span class="tok-method">Separator</span>(),
+                    <span class="tok-type">ModMenuItem</span>.<span class="tok-method">Separator</span>(),
                     <span class="tok-kw">new</span> <span class="tok-type">ModMenuItem</span>(<span class="tok-str">"Exit App"</span>, () =&gt; context.Window.<span class="tok-method">Close</span>())
                 });
                 ribbon.<span class="tok-method">SetHelp</span>(() =&gt; context.<span class="tok-method">ShowMessage</span>(<span class="tok-str">"Help"</span>, <span class="tok-str">"Explore the ribbon tabs above!"</span>));
@@ -907,7 +967,7 @@
                 context.Data.<span class="tok-method">WriteText</span>(<span class="tok-str">"clicks.txt"</span>, _clicks.<span class="tok-method">ToString</span>());
                 <span class="tok-method">UpdateCounter</span>();
 
-                <span class="tok-kw">int</span> every = Math.<span class="tok-method">Max</span>(<span class="tok-num">1</span>, context.Settings.<span class="tok-method">GetInt</span>(<span class="tok-str">"notifyEvery"</span>, <span class="tok-num">5</span>));
+                <span class="tok-kw">int</span> every = <span class="tok-type">Math</span>.<span class="tok-method">Max</span>(<span class="tok-num">1</span>, context.Settings.<span class="tok-method">GetInt</span>(<span class="tok-str">"notifyEvery"</span>, <span class="tok-num">5</span>));
                 <span class="tok-kw">if</span> (context.Settings.<span class="tok-method">GetBool</span>(<span class="tok-str">"notify"</span>, <span class="tok-kw">true</span>) &amp;&amp; _clicks % every == <span class="tok-num">0</span>)
                 {
                     <span class="tok-com">// Needs "notifications" in "permissions" (AppInfo.json). Without it a ModPermissionException is thrown.</span>
@@ -916,7 +976,7 @@
             };
 
             <span class="tok-com">// Start a UI thread timer (ticks every second)</span>
-            _timer = context.<span class="tok-method">StartTimer</span>(TimeSpan.<span class="tok-method">FromSeconds</span>(<span class="tok-num">1</span>), () =&gt;
+            _timer = context.<span class="tok-method">StartTimer</span>(<span class="tok-type">TimeSpan</span>.<span class="tok-method">FromSeconds</span>(<span class="tok-num">1</span>), () =&gt;
             {
                 <span class="tok-kw">if</span> (_isAutoClickerActive)
                 {
@@ -932,6 +992,29 @@
             }
 
             <span class="tok-kw">return</span> view;
+        }
+
+        <span class="tok-com">// Drag the blue box onto the grey one. Drag and drop works inside the app window only and needs no permission.</span>
+        <span class="tok-com">// The registrations are removed automatically when the window closes (or Dispose() them yourself).</span>
+        <span class="tok-kw">private void</span> <span class="tok-method">SetupDragAndDrop</span>(<span class="tok-type">IModContext</span> context, <span class="tok-type">FrameworkElement</span> view)
+        {
+            <span class="tok-type">Border</span>? dragSource = context.<span class="tok-method">Find</span>&lt;<span class="tok-type">Border</span>&gt;(view, <span class="tok-str">"DragSource"</span>);
+            <span class="tok-type">Border</span>? dropZone = context.<span class="tok-method">Find</span>&lt;<span class="tok-type">Border</span>&gt;(view, <span class="tok-str">"DropZone"</span>);
+            <span class="tok-type">TextBlock</span>? dropText = context.<span class="tok-method">Find</span>&lt;<span class="tok-type">TextBlock</span>&gt;(view, <span class="tok-str">"DropText"</span>);
+            <span class="tok-kw">if</span> (dragSource == <span class="tok-kw">null</span> || dropZone == <span class="tok-kw">null</span> || dropText == <span class="tok-kw">null</span>) <span class="tok-kw">return</span>;
+
+            <span class="tok-type">Brush</span> normal = dropZone.Background;
+
+            context.DragDrop.<span class="tok-method">AddDragSource</span>(dragSource, () =&gt; <span class="tok-kw">new</span> <span class="tok-type">ModDragData</span>(<span class="tok-str">"Item #"</span> + (_clicks + <span class="tok-num">1</span>)));
+
+            context.DragDrop.<span class="tok-method">AddDropTarget</span>(dropZone,
+                data =&gt; data.Text != <span class="tok-kw">null</span>,                                   <span class="tok-com">// which drags are welcome</span>
+                (data, position) =&gt;                                          <span class="tok-com">// the drop</span>
+                {
+                    dropText.Text = <span class="tok-str">"Dropped: "</span> + data.Text;
+                    <span class="tok-method">SetStatus</span>(<span class="tok-str">"Dropped \""</span> + data.Text + <span class="tok-str">"\" (hold Ctrl while dropping for a copy)."</span>);
+                },
+                hovering =&gt; dropZone.Background = hovering ? <span class="tok-type">Brushes</span>.LightSkyBlue : normal);   <span class="tok-com">// highlight while over it</span>
         }
 
         <span class="tok-kw">private void</span> <span class="tok-method">ApplySettings</span>(<span class="tok-type">IModContext</span> context, <span class="tok-type">TextBlock</span> greeting)
@@ -966,7 +1049,7 @@
 
                 <h3>MainView.xaml</h3>
                 <p>
-                    The advanced WPF user interface definition featuring a grid header, text notes editor, and status bar.
+                    The advanced WPF user interface definition featuring a grid header, a small drag and drop demo, a text notes editor, and a status bar.
                 </p>
 
                 <div class="code-block-wrapper">
@@ -988,6 +1071,7 @@
       <span class="tok-attr">Background</span>=<span class="tok-str">"White"</span><span class="tok-tag">&gt;</span>
     <span class="tok-tag">&lt;Grid.RowDefinitions&gt;</span>
         <span class="tok-tag">&lt;RowDefinition</span> <span class="tok-attr">Height</span>=<span class="tok-str">"Auto"</span><span class="tok-tag">/&gt;</span>
+        <span class="tok-tag">&lt;RowDefinition</span> <span class="tok-attr">Height</span>=<span class="tok-str">"Auto"</span><span class="tok-tag">/&gt;</span>
         <span class="tok-tag">&lt;RowDefinition</span> <span class="tok-attr">Height</span>=<span class="tok-str">"*"</span><span class="tok-tag">/&gt;</span>
         <span class="tok-tag">&lt;RowDefinition</span> <span class="tok-attr">Height</span>=<span class="tok-str">"Auto"</span><span class="tok-tag">/&gt;</span>
     <span class="tok-tag">&lt;/Grid.RowDefinitions&gt;</span>
@@ -1001,8 +1085,19 @@
         <span class="tok-tag">&lt;/StackPanel&gt;</span>
     <span class="tok-tag">&lt;/StackPanel&gt;</span>
 
+    <span class="tok-com">&lt;!-- Drag and drop demo: drag the blue box onto the grey one (see context.DragDrop in App.cs) --&gt;</span>
+    <span class="tok-tag">&lt;StackPanel</span> <span class="tok-attr">Grid.Row</span>=<span class="tok-str">"1"</span> <span class="tok-attr">Orientation</span>=<span class="tok-str">"Horizontal"</span> <span class="tok-attr">Margin</span>=<span class="tok-str">"16,4,16,4"</span><span class="tok-tag">&gt;</span>
+        <span class="tok-tag">&lt;Border</span> <span class="tok-attr">x:Name</span>=<span class="tok-str">"DragSource"</span> <span class="tok-attr">Background</span>=<span class="tok-str">"#0078D7"</span> <span class="tok-attr">Padding</span>=<span class="tok-str">"12,6"</span> <span class="tok-attr">ToolTip</span>=<span class="tok-str">"Drag me onto the box on the right"</span><span class="tok-tag">&gt;</span>
+            <span class="tok-tag">&lt;TextBlock</span> <span class="tok-attr">Text</span>=<span class="tok-str">"Drag me"</span> <span class="tok-attr">Foreground</span>=<span class="tok-str">"White"</span><span class="tok-tag">/&gt;</span>
+        <span class="tok-tag">&lt;/Border&gt;</span>
+        <span class="tok-tag">&lt;Border</span> <span class="tok-attr">x:Name</span>=<span class="tok-str">"DropZone"</span> <span class="tok-attr">Margin</span>=<span class="tok-str">"14,0,0,0"</span> <span class="tok-attr">MinWidth</span>=<span class="tok-str">"220"</span> <span class="tok-attr">Padding</span>=<span class="tok-str">"12,6"</span>
+                <span class="tok-attr">Background</span>=<span class="tok-str">"#F7F7F7"</span> <span class="tok-attr">BorderBrush</span>=<span class="tok-str">"#999999"</span> <span class="tok-attr">BorderThickness</span>=<span class="tok-str">"1"</span><span class="tok-tag">&gt;</span>
+            <span class="tok-tag">&lt;TextBlock</span> <span class="tok-attr">x:Name</span>=<span class="tok-str">"DropText"</span> <span class="tok-attr">Text</span>=<span class="tok-str">"Drop here"</span> <span class="tok-attr">Foreground</span>=<span class="tok-str">"#666666"</span><span class="tok-tag">/&gt;</span>
+        <span class="tok-tag">&lt;/Border&gt;</span>
+    <span class="tok-tag">&lt;/StackPanel&gt;</span>
+
     <span class="tok-com">&lt;!-- Text Notes Editor --&gt;</span>
-    <span class="tok-tag">&lt;TextBox</span> <span class="tok-attr">x:Name</span>=<span class="tok-str">"EditorBox"</span> <span class="tok-attr">Grid.Row</span>=<span class="tok-str">"1"</span> <span class="tok-attr">Margin</span>=<span class="tok-str">"16,4,16,8"</span>
+    <span class="tok-tag">&lt;TextBox</span> <span class="tok-attr">x:Name</span>=<span class="tok-str">"EditorBox"</span> <span class="tok-attr">Grid.Row</span>=<span class="tok-str">"2"</span> <span class="tok-attr">Margin</span>=<span class="tok-str">"16,4,16,8"</span>
              <span class="tok-attr">AcceptsReturn</span>=<span class="tok-str">"True"</span> <span class="tok-attr">TextWrapping</span>=<span class="tok-str">"Wrap"</span>
              <span class="tok-attr">BorderBrush</span>=<span class="tok-str">"#CCCCCC"</span> <span class="tok-attr">BorderThickness</span>=<span class="tok-str">"1"</span> <span class="tok-attr">Padding</span>=<span class="tok-str">"8"</span>
              <span class="tok-attr">FontFamily</span>=<span class="tok-str">"Consolas"</span> <span class="tok-attr">FontSize</span>=<span class="tok-str">"13"</span>
@@ -1010,7 +1105,7 @@
              <span class="tok-attr">ToolTip</span>=<span class="tok-str">"Type notes here. Saved automatically to app data folder."</span><span class="tok-tag">/&gt;</span>
 
     <span class="tok-com">&lt;!-- Status Bar --&gt;</span>
-    <span class="tok-tag">&lt;Border</span> <span class="tok-attr">Grid.Row</span>=<span class="tok-str">"2"</span> <span class="tok-attr">Background</span>=<span class="tok-str">"#F3F3F3"</span> <span class="tok-attr">BorderBrush</span>=<span class="tok-str">"#E0E0E0"</span> <span class="tok-attr">BorderThickness</span>=<span class="tok-str">"0,1,0,0"</span> <span class="tok-attr">Padding</span>=<span class="tok-str">"12,6"</span><span class="tok-tag">&gt;</span>
+    <span class="tok-tag">&lt;Border</span> <span class="tok-attr">Grid.Row</span>=<span class="tok-str">"3"</span> <span class="tok-attr">Background</span>=<span class="tok-str">"#F3F3F3"</span> <span class="tok-attr">BorderBrush</span>=<span class="tok-str">"#E0E0E0"</span> <span class="tok-attr">BorderThickness</span>=<span class="tok-str">"0,1,0,0"</span> <span class="tok-attr">Padding</span>=<span class="tok-str">"12,6"</span><span class="tok-tag">&gt;</span>
         <span class="tok-tag">&lt;TextBlock</span> <span class="tok-attr">x:Name</span>=<span class="tok-str">"StatusText"</span> <span class="tok-attr">Text</span>=<span class="tok-str">"Ready (Try the Ribbon tabs and Menu bar above!)"</span> <span class="tok-attr">FontSize</span>=<span class="tok-str">"11"</span> <span class="tok-attr">Foreground</span>=<span class="tok-str">"#666666"</span><span class="tok-tag">/&gt;</span>
     <span class="tok-tag">&lt;/Border&gt;</span>
 <span class="tok-tag">&lt;/Grid&gt;</span></code></pre>
@@ -1035,7 +1130,7 @@
   <span class="tok-str">"name"</span>: <span class="tok-str">"Template App"</span>,
   <span class="tok-str">"version"</span>: <span class="tok-str">"2.0.0"</span>,
   <span class="tok-str">"author"</span>: <span class="tok-str">"You"</span>,
-  <span class="tok-str">"description"</span>: <span class="tok-str">"An example app with ribbon, menus, clipboard, prompts, and timers."</span>,
+  <span class="tok-str">"description"</span>: <span class="tok-str">"An example app with ribbon, menus, clipboard, prompts, timers, drag and drop and window options."</span>,
 
   <span class="tok-com">// The icon: a .png or .ico file in this folder. Without it the glyph below (Segoe MDL2 Assets) is used.</span>
   <span class="tok-com">// "icon": "icon.png",</span>
@@ -1059,9 +1154,9 @@
     <span class="tok-str">"ribbon"</span>: <span class="tok-kw">true</span>
   },
 
-  <span class="tok-com">// What the app may do besides the basics. Known permissions: "files", "notifications", "clipboard".</span>
+  <span class="tok-com">// What the app may do besides the basics. Known permissions: "files", "notifications", "clipboard", "bsod" (blue screen).</span>
   <span class="tok-com">// Changing this file means the app has to be compiled again in Apps Manager.</span>
-  <span class="tok-str">"permissions"</span>: [ <span class="tok-str">"notifications"</span>, <span class="tok-str">"clipboard"</span>, <span class="tok-str">"files"</span> ]
+  <span class="tok-str">"permissions"</span>: [ <span class="tok-str">"notifications"</span>, <span class="tok-str">"clipboard"</span>, <span class="tok-str">"files"</span>, <span class="tok-str">"bsod"</span> ]
 }</code></pre>
                 </div>
 
@@ -1149,6 +1244,11 @@
                                 <td><code>"clipboard"</code></td>
                                 <td><code>IModContext.Clipboard</code></td>
                                 <td>Grants read and write access to the system text clipboard.</td>
+                            </tr>
+                            <tr>
+                                <td><code>"bsod"</code></td>
+                                <td><code>IModContext.TriggerBsod(...)</code></td>
+                                <td>Allows the app to crash the simulated PC with a blue screen (the PC restarts afterwards and everything open is lost). Ask the user first, for example with <code>IModContext.Confirm</code>.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1292,7 +1392,7 @@
                             </tr>
                             <tr>
                                 <td><strong>Exception Handling</strong></td>
-                                <td>Catch <code>ModPermissionException</code> if calling <code>context.Files</code>, <code>context.PickFile</code>, <code>context.Clipboard</code>, or <code>context.Notify</code> when permissions might be omitted.</td>
+                                <td>Catch <code>ModPermissionException</code> if calling <code>context.Files</code>, <code>context.PickFile</code>, <code>context.Clipboard</code>, <code>context.Notify</code>, or <code>context.TriggerBsod</code> when permissions might be omitted.</td>
                                 <td><code>try { context.Notify(...); } catch (ModPermissionException) { }</code></td>
                             </tr>
                         </tbody>
@@ -1593,6 +1693,11 @@ context.Window.Title = <span class="tok-str">"Document - Edited"</span>;</code><
                                     <div><span class="perm-pill">Requires "clipboard" permission</span></div>
                                 </td>
                             </tr>
+                            <tr>
+                                <td><span class="member-sig">DragDrop</span></td>
+                                <td><a href="#imoddragdrop" class="member-type">IModDragDrop</a></td>
+                                <td>Drag and drop between the elements of the app window. Needs no permission.</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -1668,6 +1773,22 @@ context.Window.Title = <span class="tok-str">"Document - Edited"</span>;</code><
                                 <td><span class="member-sig">StartTimer(TimeSpan interval, Action tick)</span></td>
                                 <td><span class="member-type">IDisposable</span></td>
                                 <td>Calls <code>tick</code> on the UI thread every <code>interval</code> (at least 50 ms, at most 16 timers per app). Dispose the result to stop it; timers are also stopped when the window closes.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">TriggerBsod(ModBsodType type)</span></td>
+                                <td><span class="member-type">void</span></td>
+                                <td>
+                                    Crashes the simulated PC with a blue screen, then restarts it (everything open is lost). See <a href="#modbsodtype"><code>ModBsodType</code></a>.
+                                    <div><span class="perm-pill">Requires "bsod" permission</span></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">TriggerBsod(string stopCode, string? whatFailed = null)</span></td>
+                                <td><span class="member-type">void</span></td>
+                                <td>
+                                    Same, with your own stop code (letters, digits, <code>_</code> and space, up to 40 characters, shown in capitals) and an optional "What failed" file name.
+                                    <div><span class="perm-pill">Requires "bsod" permission</span></div>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -1889,6 +2010,21 @@ context.Window.Title = <span class="tok-str">"Document - Edited"</span>;</code><
                                 <td><a href="#imodribbon" class="member-type">IModRibbon?</a></td>
                                 <td>The ribbon of the window, or <code>null</code>. Only apps with <code>"ribbon": true</code> in the <code>"window"</code> section of <code>AppInfo.json</code> get a ribbon window (File Explorer style); all other apps return <code>null</code> here.</td>
                             </tr>
+                            <tr>
+                                <td><span class="member-sig">TitleBarHeight</span></td>
+                                <td><span class="member-type">double</span></td>
+                                <td>Height of the title bar in pixels (default <code>30</code>, allowed <code>24</code> to <code>80</code>; other values are clamped). The Minimize / Maximize / Close buttons adapt to it, unless <code>UserClassicButtons</code> is <code>true</code>.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">CaptionButtonWidth</span></td>
+                                <td><span class="member-type">double</span></td>
+                                <td>Width of the Minimize / Maximize / Close buttons in pixels (<code>20</code> to <code>200</code>; clamped). <code>double.NaN</code> (default) = automatic. Set it equal to <code>TitleBarHeight</code> for square buttons. Ignored while <code>UserClassicButtons</code> is <code>true</code>.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">UserClassicButtons</span></td>
+                                <td><span class="member-type">bool</span></td>
+                                <td><code>true</code> = classic button sizes: two small buttons and a bigger one, short and thin, hanging from the top edge. They ignore <code>TitleBarHeight</code> and <code>CaptionButtonWidth</code>. Only the size changes: the buttons keep their Windows 10 look and highlights. Default: <code>false</code>.</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -2002,6 +2138,290 @@ context.Window.Title = <span class="tok-str">"Document - Edited"</span>;</code><
                         </tbody>
                     </table>
                 </div>
+            </section>
+
+            <!-- IMODDRAGDROP INTERFACE -->
+            <section id="imoddragdrop">
+                <h2>
+                    <span>IModDragDrop Interface</span>
+                    <span class="type-badge badge-interface">Interface</span>
+                </h2>
+
+                <div class="definition-card">
+                    <div class="definition-row">
+                        <span class="definition-label">Namespace</span>
+                        <span><code>Win10Sim.Sdk</code></span>
+                    </div>
+                </div>
+
+                <p>
+                    Drag and drop between the elements of <strong>one</strong> app window. Accessed via <code>IModContext.DragDrop</code>. Needs no permission.
+                </p>
+
+                <div class="code-block-wrapper">
+                    <div class="code-block-header">
+                        <span>C# — Declaration</span>
+                        <button type="button" class="copy-btn" data-copy>
+                            <span class="icon" aria-hidden="true">&#xE8C8;</span>
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                    <pre><code><span class="tok-kw">public</span> interface <span class="tok-type">IModDragDrop</span></code></pre>
+                </div>
+
+                <h3>Methods</h3>
+                <div class="api-table-wrap">
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Returns</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="member-sig">AddDragSource(FrameworkElement source, Func&lt;ModDragData?&gt; getData, ModDragEffect allowed = Copy | Move, Action&lt;ModDragEffect&gt;? finished = null)</span></td>
+                                <td><span class="member-type">IDisposable</span></td>
+                                <td>Makes <code>source</code> draggable: when the user holds the left button and moves a few pixels, <code>getData</code> is asked for the data (return <code>null</code> to cancel the drag). <code>finished</code> is called with what the drop target did. Dispose the result to stop.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">StartDrag(FrameworkElement source, ModDragData data, ModDragEffect allowed = Copy | Move)</span></td>
+                                <td><span class="member-type">ModDragEffect</span></td>
+                                <td>Starts a drag by hand (call it from a mouse handler while the left button is down). Blocks until the mouse button is released and returns what the drop target did, or <code>None</code> when the drag was cancelled.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">AddDropTarget(FrameworkElement target, Func&lt;ModDragData, bool&gt; canDrop, Action&lt;ModDragData, Point&gt; drop, Action&lt;bool&gt;? hover = null)</span></td>
+                                <td><span class="member-type">IDisposable</span></td>
+                                <td><code>canDrop</code> decides if the data is welcome, <code>drop</code> gets the data and the mouse position relative to the target, <code>hover</code> (optional) is called with <code>true</code> while a welcome drag is over the target and <code>false</code> when it left or was dropped. Hold <kbd>Ctrl</kbd> while dropping for a copy. Dispose the result to stop.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="learn-callout">
+                    <div class="callout-title">
+                        <span class="callout-icon" aria-hidden="true">&#xE946;</span>
+                        <span>Good to know</span>
+                    </div>
+                    <p>
+                        Drag and drop works between elements of the same app window and needs no permission. The data never leaves the app: another app (or the desktop) can't receive it. An app can have at most 64 drag sources and drop targets together; they are removed automatically when the window closes.
+                    </p>
+                </div>
+
+                <div class="code-block-wrapper">
+                    <div class="code-block-header">
+                        <span>C# — Example</span>
+                        <button type="button" class="copy-btn" data-copy>
+                            <span class="icon" aria-hidden="true">&#xE8C8;</span>
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                    <pre><code><span class="tok-type">Border</span> box = context.<span class="tok-method">Find</span>&lt;<span class="tok-type">Border</span>&gt;(view, <span class="tok-str">"DragSource"</span>)!;
+<span class="tok-type">Border</span> zone = context.<span class="tok-method">Find</span>&lt;<span class="tok-type">Border</span>&gt;(view, <span class="tok-str">"DropZone"</span>)!;
+<span class="tok-type">TextBlock</span> label = context.<span class="tok-method">Find</span>&lt;<span class="tok-type">TextBlock</span>&gt;(view, <span class="tok-str">"DropText"</span>)!;
+
+context.DragDrop.<span class="tok-method">AddDragSource</span>(box, () =&gt; <span class="tok-kw">new</span> <span class="tok-type">ModDragData</span>(<span class="tok-str">"Item #1"</span>));
+
+context.DragDrop.<span class="tok-method">AddDropTarget</span>(zone,
+    data =&gt; data.Text != <span class="tok-kw">null</span>,
+    (data, position) =&gt; label.Text = <span class="tok-str">"Dropped: "</span> + data.Text,
+    hovering =&gt; zone.Background = hovering ? <span class="tok-type">Brushes</span>.LightSkyBlue : <span class="tok-type">Brushes</span>.WhiteSmoke);</code></pre>
+                </div>
+
+            </section>
+
+            <!-- MODDRAGDATA CLASS -->
+            <section id="moddragdata">
+                <h2>
+                    <span>ModDragData Class</span>
+                    <span class="type-badge badge-class">Class</span>
+                </h2>
+
+                <div class="definition-card">
+                    <div class="definition-row">
+                        <span class="definition-label">Namespace</span>
+                        <span><code>Win10Sim.Sdk</code></span>
+                    </div>
+                </div>
+
+                <p>
+                    The data carried by a drag inside an app. Only the same app can receive it.
+                </p>
+
+                <div class="code-block-wrapper">
+                    <div class="code-block-header">
+                        <span>C# — Declaration</span>
+                        <button type="button" class="copy-btn" data-copy>
+                            <span class="icon" aria-hidden="true">&#xE8C8;</span>
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                    <pre><code><span class="tok-kw">public sealed class</span> <span class="tok-type">ModDragData</span></code></pre>
+                </div>
+
+                <h3>Constructor</h3>
+                <div class="api-table-wrap">
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>Constructor</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="member-sig">ModDragData(string? text = null, object? value = null)</span></td>
+                                <td>Creates the drag data.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Properties</h3>
+                <div class="api-table-wrap">
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>Property</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="member-sig">Text</span></td>
+                                <td><span class="member-type">string?</span></td>
+                                <td>A text for the drop target (a file name, an id ...).</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">Value</span></td>
+                                <td><span class="member-type">object?</span></td>
+                                <td>Any object of your app, handed to the drop target as it is.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </section>
+
+            <!-- MODDRAGEFFECT ENUM -->
+            <section id="moddrageffect">
+                <h2>
+                    <span>ModDragEffect Enum</span>
+                    <span class="type-badge badge-class">Enum</span>
+                </h2>
+
+                <div class="definition-card">
+                    <div class="definition-row">
+                        <span class="definition-label">Namespace</span>
+                        <span><code>Win10Sim.Sdk</code></span>
+                    </div>
+                </div>
+
+                <p>
+                    What a drag may do with its data. Combine the values with <code>|</code>. Used by <a href="#imoddragdrop"><code>IModDragDrop</code></a>.
+                </p>
+
+                <div class="code-block-wrapper">
+                    <div class="code-block-header">
+                        <span>C# — Declaration</span>
+                        <button type="button" class="copy-btn" data-copy>
+                            <span class="icon" aria-hidden="true">&#xE8C8;</span>
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                    <pre><code>[<span class="tok-type">Flags</span>]
+<span class="tok-kw">public enum</span> <span class="tok-type">ModDragEffect</span></code></pre>
+                </div>
+
+                <h3>Values</h3>
+                <div class="api-table-wrap">
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>Value</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="member-sig">None = 0</span></td>
+                                <td>Nothing: the drag was cancelled or the target refused it.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">Copy = 1</span></td>
+                                <td>The target gets a copy (the user holds Ctrl while dropping).</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">Move = 2</span></td>
+                                <td>The data is moved (the default).</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </section>
+
+            <!-- MODBSODTYPE ENUM -->
+            <section id="modbsodtype">
+                <h2>
+                    <span>ModBsodType Enum</span>
+                    <span class="type-badge badge-class">Enum</span>
+                </h2>
+
+                <div class="definition-card">
+                    <div class="definition-row">
+                        <span class="definition-label">Namespace</span>
+                        <span><code>Win10Sim.Sdk</code></span>
+                    </div>
+                </div>
+
+                <p>
+                    The ready-made blue screens an app can show with <a href="#imodcontext"><code>IModContext.TriggerBsod(ModBsodType)</code></a>. Needs the <code>"bsod"</code> permission in <code>AppInfo.json</code>.
+                </p>
+
+                <div class="code-block-wrapper">
+                    <div class="code-block-header">
+                        <span>C# — Declaration</span>
+                        <button type="button" class="copy-btn" data-copy>
+                            <span class="icon" aria-hidden="true">&#xE8C8;</span>
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                    <pre><code><span class="tok-kw">public enum</span> <span class="tok-type">ModBsodType</span></code></pre>
+                </div>
+
+                <h3>Values</h3>
+                <div class="api-table-wrap">
+                    <table class="api-table">
+                        <thead>
+                            <tr>
+                                <th>Value</th>
+                                <th>Stop code</th>
+                                <th>What failed</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="member-sig">IrqlNotLessOrEqual</span></td>
+                                <td><code>IRQL_NOT_LESS_OR_EQUAL</code></td>
+                                <td><code>ntoskrnl.exe</code></td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">CriticalProcessDied</span></td>
+                                <td><code>CRITICAL_PROCESS_DIED</code></td>
+                                <td>(none)</td>
+                            </tr>
+                            <tr>
+                                <td><span class="member-sig">SystemServiceException</span></td>
+                                <td><code>SYSTEM_SERVICE_EXCEPTION</code></td>
+                                <td><code>win32kfull.sys</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
             </section>
 
             <!-- IMODRIBBON INTERFACE -->
@@ -2690,6 +3110,10 @@ context.Window.Title = <span class="tok-str">"Document - Edited"</span>;</code><
                 <li><a href="#imodsettings">IModSettings Interface</a></li>
                 <li><a href="#imodwindow">IModWindow Interface</a></li>
                 <li><a href="#imodclipboard">IModClipboard Interface</a></li>
+                <li><a href="#imoddragdrop">IModDragDrop Interface</a></li>
+                <li><a href="#moddragdata">ModDragData Class</a></li>
+                <li><a href="#moddrageffect">ModDragEffect Enum</a></li>
+                <li><a href="#modbsodtype">ModBsodType Enum</a></li>
                 <li><a href="#imodribbon">IModRibbon Interface</a></li>
                 <li><a href="#modmenuitem">ModMenuItem Class</a></li>
                 <li><a href="#modribbontab">ModRibbonTab Class</a></li>
